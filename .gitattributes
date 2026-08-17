@@ -1,0 +1,5 @@
+*.pkl binary
+*.keras binary
+*.h5 binary
+*.bin binary
+*.safetensors binary
