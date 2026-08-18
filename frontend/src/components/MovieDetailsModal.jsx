@@ -1,15 +1,6 @@
 import React from 'react';
-import { X, Star, Calendar, Bookmark, Check, Film, ExternalLink } from 'lucide-react';
+import { X, Star, Calendar, Bookmark, Check, ExternalLink } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-const EMOTION_COLORS = {
-  Joy: '#F59E0B',
-  Love: '#EC4899',
-  Surprise: '#A855F7',
-  Sadness: '#3B82F6',
-  Fear: '#10B981',
-  Anger: '#EF4444',
-};
 
 export const MovieDetailsModal = ({
   movie,
@@ -30,22 +21,31 @@ export const MovieDetailsModal = ({
     ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
     : null;
 
-  const emotionColor = EMOTION_COLORS[movie.emotion_label] || 'var(--cinema-gold)';
+  const isQueued = isInWatchlist && watchlistStatus === 'plan_to_watch';
+  const isWatched = isInWatchlist && watchlistStatus === 'watched';
 
-  const handleWatchlistClick = () => {
+  const handleQueueClick = () => {
     if (isGuest) {
       onOpenAuth?.();
       return;
     }
-    onToggleWatchlist?.(movie);
+    onToggleWatchlist?.(movie, 'plan_to_watch');
+  };
+
+  const handleWatchedClick = () => {
+    if (isGuest) {
+      onOpenAuth?.();
+      return;
+    }
+    onToggleWatchlist?.(movie, 'watched');
   };
 
   return (
     <div style={{
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.88)',
-      backdropFilter: 'blur(16px)',
+      backgroundColor: 'rgba(5, 5, 7, 0.88)',
+      backdropFilter: 'blur(12px)',
       zIndex: 100,
       display: 'flex',
       alignItems: 'center',
@@ -53,16 +53,15 @@ export const MovieDetailsModal = ({
       padding: '1rem',
     }}>
       <div 
-        className="theatre-card"
         style={{
           width: '100%',
-          maxWidth: '750px',
+          maxWidth: '700px',
           maxHeight: '90vh',
           overflowY: 'auto',
-          backgroundColor: '#120A0F',
-          border: '1px solid rgba(229, 9, 20, 0.4)',
-          borderRadius: 'var(--radius-lg)',
-          boxShadow: '0 25px 80px rgba(0,0,0,0.95), 0 0 50px rgba(229,9,20,0.3)',
+          backgroundColor: '#111114',
+          border: '1px solid var(--border-medium)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.85)',
           position: 'relative',
         }}
       >
@@ -71,116 +70,104 @@ export const MovieDetailsModal = ({
           onClick={onClose}
           style={{
             position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            color: '#FFFFFF',
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
+            top: '0.85rem',
+            right: '0.85rem',
+            backgroundColor: 'rgba(12, 12, 14, 0.75)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-secondary)',
+            width: '32px',
+            height: '32px',
+            borderRadius: 'var(--radius-xs)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
             zIndex: 10,
+            transition: 'var(--transition-smooth)',
           }}
+          onMouseEnter={(e) => e.target.style.color = '#FFFFFF'}
+          onMouseLeave={(e) => e.target.style.color = 'var(--text-secondary)'}
         >
-          <X size={20} />
+          <X size={16} />
         </button>
 
-        {/* Backdrop Banner Header */}
-        <div style={{
-          position: 'relative',
-          width: '100%',
-          height: '240px',
-          backgroundColor: '#1A0E17',
-          overflow: 'hidden',
-        }}>
-          {backdropUrl ? (
+        {/* Backdrop Banner */}
+        {backdropUrl && (
+          <div style={{
+            position: 'relative',
+            width: '100%',
+            height: 'clamp(140px, 25vh, 200px)',
+            backgroundColor: '#151518',
+            overflow: 'hidden',
+          }}>
             <img
               src={backdropUrl}
               alt={movie.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }}
             />
-          ) : (
-            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Film size={60} color="var(--marquee-red)" style={{ opacity: 0.25 }} />
-            </div>
-          )}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(to top, #120A0F 0%, rgba(18, 10, 15, 0.6) 50%, transparent 100%)',
-          }} />
-        </div>
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, #111114 0%, rgba(17, 17, 20, 0.4) 50%, transparent 100%)',
+            }} />
+          </div>
+        )}
 
-        {/* Modal Main Body */}
-        <div style={{ padding: '0 2rem 2rem 2rem', marginTop: '-60px', position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-            {/* Poster thumbnail */}
+        {/* Content Container */}
+        <div style={{ padding: 'clamp(1rem, 3vw, 1.75rem)' }}>
+          <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+            {/* Poster */}
             {posterUrl && (
               <img
                 src={posterUrl}
                 alt={movie.title}
                 style={{
-                  width: '130px',
-                  borderRadius: 'var(--radius-md)',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.8)',
-                  border: '2px solid rgba(255,255,255,0.15)',
+                  width: 'clamp(90px, 20vw, 120px)',
+                  borderRadius: 'var(--radius-xs)',
+                  border: '1px solid var(--border-subtle)',
                   flexShrink: 0,
+                  alignSelf: 'flex-start',
                 }}
               />
             )}
 
-            {/* Title & Stats */}
-            <div style={{ flex: 1, minWidth: '260px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-                <span style={{
-                  backgroundColor: 'rgba(0,0,0,0.7)',
-                  border: `1px solid ${emotionColor}`,
-                  color: emotionColor,
-                  padding: '2px 10px',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.75rem',
-                  fontWeight: '700',
-                }}>
-                  ● {movie.emotion_label}
-                </span>
-
-                {movie.hybrid_score > 0 && (
+            {/* Header info */}
+            <div style={{ flex: 1, minWidth: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+              {movie.hybrid_score > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
                   <span style={{
-                    backgroundColor: 'rgba(229, 9, 20, 0.85)',
-                    color: '#FFFFFF',
-                    padding: '2px 10px',
-                    borderRadius: 'var(--radius-full)',
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
+                    color: 'var(--accent-gold)',
+                    border: '1px solid var(--border-accent)',
+                    padding: '2px 8px',
+                    borderRadius: 'var(--radius-xs)',
+                    fontSize: '0.7rem',
+                    fontWeight: '600',
+                    fontFamily: 'var(--font-mono)',
                   }}>
-                    {Math.round(movie.hybrid_score * 100)}% Match
+                    {Math.round(movie.hybrid_score * 100)}% MATCH
                   </span>
-                )}
-              </div>
+                </div>
+              )}
 
               <h2 style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: '1.6rem',
-                fontWeight: '800',
-                color: '#FFFFFF',
+                fontFamily: 'var(--font-serif)',
+                fontSize: 'clamp(1.25rem, 4vw, 1.75rem)',
+                fontWeight: '600',
+                color: 'var(--text-primary)',
                 lineHeight: '1.2',
                 marginBottom: '0.5rem',
               }}>
                 {movie.title}
               </h2>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--cinema-gold)', fontWeight: '700' }}>
-                  <Star size={16} fill="var(--cinema-gold)" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', color: 'var(--text-secondary)', fontSize: '0.78rem', fontFamily: 'var(--font-mono)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3px', color: 'var(--text-primary)' }}>
+                  <Star size={12} fill="var(--accent-gold)" color="var(--accent-gold)" />
                   <span>{movie.vote_average ? movie.vote_average.toFixed(1) : '7.0'} / 10</span>
                 </div>
                 {movie.release_date && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Calendar size={15} />
+                    <Calendar size={12} />
                     <span>{movie.release_date}</span>
                   </div>
                 )}
@@ -190,17 +177,18 @@ export const MovieDetailsModal = ({
 
           {/* Genres */}
           {movie.genres && movie.genres.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', margin: '1.25rem 0' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '1.15rem' }}>
               {movie.genres.map((genre, idx) => (
                 <span
                   key={idx}
                   style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: 'var(--text-primary)',
-                    padding: '4px 10px',
-                    borderRadius: 'var(--radius-full)',
-                    fontSize: '0.8rem',
+                    backgroundColor: 'var(--bg-surface-elevated)',
+                    border: '1px solid var(--border-subtle)',
+                    color: 'var(--text-secondary)',
+                    padding: '2px 7px',
+                    borderRadius: 'var(--radius-xs)',
+                    fontSize: '0.7rem',
+                    fontFamily: 'var(--font-mono)',
                   }}
                 >
                   {genre}
@@ -210,76 +198,61 @@ export const MovieDetailsModal = ({
           )}
 
           {/* Synopsis */}
-          <div style={{ marginTop: '1rem' }}>
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>
+          <div style={{ marginBottom: '1.25rem' }}>
+            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '0.4rem' }}>
               Synopsis
-            </h4>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>
-              {movie.overview || 'No synopsis available for this film.'}
+            </span>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: '1.6' }}>
+              {movie.overview || 'No synopsis recorded.'}
             </p>
           </div>
 
-          {/* Match Analytics Box */}
-          {movie.hybrid_score > 0 && (
-            <div style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
-              borderRadius: 'var(--radius-md)',
-              padding: '1rem',
-              margin: '1.25rem 0',
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '1rem',
-            }}>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Semantic Narrative Sim</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: '700', color: '#60A5FA' }}>
-                  {Math.round(movie.semantic_similarity * 100)}%
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Emotion Resonance Score</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: '700', color: emotionColor }}>
-                  {Math.round(movie.emotion_resonance * 100)}%
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Action Row */}
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.85rem', borderTop: '1px solid var(--border-subtle)', flexWrap: 'wrap' }}>
             <button
-              onClick={handleWatchlistClick}
-              className="btn-marquee"
+              onClick={handleQueueClick}
+              className="btn-editorial-primary"
               style={{
                 flex: 1,
+                minWidth: '110px',
                 justifyContent: 'center',
-                backgroundColor: isInWatchlist ? 'rgba(255, 215, 0, 0.2)' : undefined,
-                borderColor: isInWatchlist ? 'var(--cinema-gold)' : undefined,
-                color: isInWatchlist ? 'var(--cinema-gold)' : undefined,
+                backgroundColor: isQueued ? 'rgba(200, 170, 118, 0.2)' : undefined,
+                color: isQueued ? 'var(--accent-gold)' : undefined,
+                borderColor: isQueued ? 'var(--accent-gold)' : undefined,
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.78rem',
               }}
             >
-              {isInWatchlist ? (
-                <>
-                  <Check size={18} />
-                  <span>{watchlistStatus === 'watched' ? 'Watched (In Watchlist)' : 'Saved in Watchlist'}</span>
-                </>
-              ) : (
-                <>
-                  <Bookmark size={18} />
-                  <span>Save to Watchlist</span>
-                </>
-              )}
+              <Bookmark size={14} fill={isQueued ? 'var(--accent-gold)' : 'none'} />
+              <span>{isQueued ? 'In Queue' : 'Add to Queue'}</span>
+            </button>
+
+            <button
+              onClick={handleWatchedClick}
+              className="btn-editorial-secondary"
+              style={{
+                flex: 1,
+                minWidth: '110px',
+                justifyContent: 'center',
+                backgroundColor: isWatched ? 'rgba(120, 180, 140, 0.18)' : undefined,
+                color: isWatched ? '#a3d4b6' : undefined,
+                borderColor: isWatched ? '#739682' : undefined,
+                padding: '0.5rem 0.75rem',
+                fontSize: '0.78rem',
+              }}
+            >
+              <Check size={14} strokeWidth={isWatched ? 3 : 2} />
+              <span>{isWatched ? 'Marked Watched' : 'Mark as Watched'}</span>
             </button>
 
             <a
               href={`https://www.themoviedb.org/movie/${movie.movie_id}`}
               target="_blank"
               rel="noreferrer"
-              className="btn-secondary"
-              style={{ textDecoration: 'none' }}
+              className="btn-editorial-secondary"
+              style={{ textDecoration: 'none', padding: '0.5rem 0.85rem', fontSize: '0.78rem' }}
             >
-              <ExternalLink size={16} />
+              <ExternalLink size={13} />
               <span>TMDB</span>
             </a>
           </div>

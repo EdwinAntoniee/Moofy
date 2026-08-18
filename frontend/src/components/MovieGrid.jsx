@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MovieCard } from './MovieCard';
-import { Filter, SortAsc, Film, Star, Clapperboard, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 export const MovieGrid = ({
   movies = [],
@@ -10,10 +10,10 @@ export const MovieGrid = ({
   onOpenAuth,
 }) => {
   const [filterEmotion, setFilterEmotion] = useState('ALL');
-  const [sortBy, setSortBy] = useState('rating'); // Default: 'rating' (Highest Rating First)
-  const [visibleCount, setVisibleCount] = useState(4); // Default to 4 movies for clean spotlight
+  const [sortBy, setSortBy] = useState('match'); // Default: 'match'
+  const [visibleCount, setVisibleCount] = useState(4); // Default: 4 spotlighted films
 
-  // Reset visible count to 4 whenever movies array changes (new search)
+  // Reset visible count to 4 whenever new search results arrive
   useEffect(() => {
     setVisibleCount(4);
   }, [movies]);
@@ -48,39 +48,35 @@ export const MovieGrid = ({
   const uniqueEmotions = ['ALL', ...new Set(movies.map((m) => m.emotion_label))];
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '2.5rem auto', padding: '0 1.5rem' }}>
-      {/* Grid Header & Filters */}
+    <div style={{ maxWidth: '1200px', margin: '2.5rem auto', padding: '0 1rem' }}>
+      {/* Editorial Section Header */}
       <div style={{
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'baseline',
         justifyContent: 'space-between',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '0.75rem',
         marginBottom: '1.5rem',
-        paddingBottom: '1rem',
-        borderBottom: '1px solid rgba(255, 215, 0, 0.15)',
+        paddingBottom: '0.85rem',
+        borderBottom: '1px solid var(--border-subtle)',
       }}>
         <div>
           <h2 style={{
-            fontFamily: 'var(--font-cinema)',
-            fontSize: '1.4rem',
-            fontWeight: '800',
-            color: '#FFFFFF',
-            letterSpacing: '1px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
+            fontFamily: 'var(--font-serif)',
+            fontSize: 'clamp(1.2rem, 3vw, 1.45rem)',
+            fontWeight: '600',
+            fontStyle: 'italic',
+            color: 'var(--text-primary)',
           }}>
-            <Film size={22} color="var(--marquee-red)" />
-            <span>Featured Screenings (Showing {displayedMovies.length} of {sorted.length})</span>
+            Movie Matches
           </h2>
         </div>
 
-        {/* Filters & Sort Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+        {/* Minimal Controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           {/* Emotion Filter */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Filter:</span>
+            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}>EMOTION:</span>
             <select
               value={filterEmotion}
               onChange={(e) => {
@@ -88,18 +84,19 @@ export const MovieGrid = ({
                 setVisibleCount(4);
               }}
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                backgroundColor: 'var(--bg-surface-elevated)',
                 border: '1px solid var(--border-subtle)',
-                color: '#FFFFFF',
-                padding: '0.35rem 0.75rem',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '0.8rem',
+                color: 'var(--text-primary)',
+                padding: '0.3rem 0.6rem',
+                borderRadius: 'var(--radius-xs)',
+                fontSize: '0.72rem',
                 outline: 'none',
                 cursor: 'pointer',
+                fontFamily: 'ui-monospace, SFMono-Regular, monospace',
               }}
             >
               {uniqueEmotions.map((emo) => (
-                <option key={emo} value={emo} style={{ backgroundColor: '#120A0F', color: '#FFFFFF' }}>
+                <option key={emo} value={emo} style={{ backgroundColor: '#111114', color: '#FFFFFF' }}>
                   {emo}
                 </option>
               ))}
@@ -108,35 +105,32 @@ export const MovieGrid = ({
 
           {/* Sort Control */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Sort by:</span>
+            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'ui-monospace, SFMono-Regular, monospace' }}>SORT:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                backgroundColor: 'var(--bg-surface-elevated)',
                 border: '1px solid var(--border-subtle)',
-                color: '#FFFFFF',
-                padding: '0.35rem 0.75rem',
-                borderRadius: 'var(--radius-sm)',
-                fontSize: '0.8rem',
+                color: 'var(--text-primary)',
+                padding: '0.3rem 0.6rem',
+                borderRadius: 'var(--radius-xs)',
+                fontSize: '0.72rem',
                 outline: 'none',
                 cursor: 'pointer',
+                fontFamily: 'ui-monospace, SFMono-Regular, monospace',
               }}
             >
-              <option value="rating" style={{ backgroundColor: '#120A0F', color: '#FFFFFF' }}>★ TMDB Rating (Highest First)</option>
-              <option value="match" style={{ backgroundColor: '#120A0F', color: '#FFFFFF' }}>⚡ Highest Match %</option>
-              <option value="year" style={{ backgroundColor: '#120A0F', color: '#FFFFFF' }}>📅 Release Year</option>
+              <option value="match" style={{ backgroundColor: '#111114', color: '#FFFFFF' }}>Match</option>
+              <option value="rating" style={{ backgroundColor: '#111114', color: '#FFFFFF' }}>Rating</option>
+              <option value="year" style={{ backgroundColor: '#111114', color: '#FFFFFF' }}>Release Year</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Movies Grid - 4 Columns */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-        gap: '1.5rem',
-      }}>
+      {/* Editorial Grid (Responsive 2-col on mobile, 4-col on desktop) */}
+      <div className="editorial-grid">
         {displayedMovies.map((movie) => (
           <MovieCard
             key={movie.movie_id}
@@ -150,25 +144,20 @@ export const MovieGrid = ({
         ))}
       </div>
 
-      {/* Load More Button */}
+      {/* Minimal Load More Action */}
       {hasMore && (
         <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>
           <button
             onClick={handleLoadMore}
-            className="btn-marquee"
+            className="btn-editorial-secondary"
             style={{
-              padding: '0.85rem 2rem',
-              fontSize: '0.95rem',
-              borderRadius: 'var(--radius-full)',
-              backgroundColor: 'rgba(229, 9, 20, 0.15)',
-              border: '1px solid var(--marquee-red)',
-              color: '#FFFFFF',
-              boxShadow: '0 0 30px rgba(229, 9, 20, 0.3)',
+              padding: '0.65rem 1.75rem',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.8rem',
             }}
           >
-            <Clapperboard size={18} color="var(--cinema-gold)" />
-            <span>Roll More Films (+4 More Choices)</span>
-            <ChevronDown size={16} />
+            <span>More Films</span>
+            <ChevronDown size={14} />
           </button>
         </div>
       )}

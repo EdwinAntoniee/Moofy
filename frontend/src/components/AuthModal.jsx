@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Film, Mail, Lock, User, AlertCircle, Sparkles } from 'lucide-react';
+import { X, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const AuthModal = ({ isOpen, onClose, onSuccess }) => {
@@ -25,7 +25,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }) => {
       } else {
         await login(email, password);
       }
-      onSuccess?.(isRegister ? 'Account created! Welcome to Moofy.' : 'Welcome back!');
+      onSuccess?.(isRegister ? 'Account created. Welcome to Moofy.' : 'Welcome back.');
       onClose();
     } catch (err) {
       setError(err.message || 'Authentication failed');
@@ -38,23 +38,23 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }) => {
     <div style={{
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.85)',
+      backgroundColor: 'rgba(5, 5, 7, 0.85)',
       backdropFilter: 'blur(12px)',
       zIndex: 100,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '1rem',
+      padding: '1.5rem',
     }}>
       <div 
-        className="theatre-card"
         style={{
           width: '100%',
-          maxWidth: '440px',
-          padding: '2rem',
-          backgroundColor: '#120A0F',
-          border: '1px solid rgba(229, 9, 20, 0.4)',
-          boxShadow: '0 25px 60px rgba(0,0,0,0.9), 0 0 40px rgba(229,9,20,0.25)',
+          maxWidth: '420px',
+          padding: '2.25rem',
+          backgroundColor: '#111114',
+          border: '1px solid var(--border-medium)',
+          borderRadius: 'var(--radius-md)',
+          boxShadow: '0 25px 60px rgba(0,0,0,0.8)',
           position: 'relative',
         }}
       >
@@ -65,68 +65,52 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }) => {
             position: 'absolute',
             top: '1.25rem',
             right: '1.25rem',
-            background: 'rgba(255,255,255,0.06)',
+            background: 'transparent',
             border: 'none',
-            color: 'var(--text-secondary)',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            color: 'var(--text-muted)',
             cursor: 'pointer',
+            padding: '4px',
           }}
         >
-          <X size={18} />
+          <X size={16} />
         </button>
 
         {/* Modal Header */}
-        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-          <div style={{
-            width: '50px',
-            height: '50px',
-            borderRadius: '14px',
-            backgroundColor: 'rgba(229, 9, 20, 0.15)',
-            border: '1px solid var(--marquee-red)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 auto 1rem auto',
-            boxShadow: '0 0 25px rgba(229, 9, 20, 0.3)',
-          }}>
-            <Film size={26} color="var(--marquee-red)" />
-          </div>
-          <h2 style={{
-            fontFamily: 'var(--font-cinema)',
-            fontSize: '1.5rem',
-            letterSpacing: '1px',
-            color: '#FFFFFF',
-            marginBottom: '0.35rem',
-          }}>
-            {isRegister ? 'Join the Cinema Club' : 'Sign In to Moofy'}
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+          {isRegister ? (
+            <h3 style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: '1.5rem',
+              fontWeight: '600',
+              fontStyle: 'italic',
+              color: 'var(--text-primary)',
+              marginBottom: '0.35rem',
+            }}>
+              Create Account
+            </h3>
+          ) : null}
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.5' }}>
             {isRegister
-              ? 'Unlock persistent Emotion History & your personal Watchlist.'
-              : 'Access your saved movies and mood journey.'}
+              ? 'Persist your emotion history and curate personal watchlists.'
+              : 'Customize your saved films and sentiment history'}
           </p>
         </div>
 
         {/* Error Alert */}
         {error && (
           <div style={{
-            backgroundColor: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid rgba(239, 68, 68, 0.4)',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
             color: '#FCA5A5',
-            padding: '0.75rem',
-            borderRadius: 'var(--radius-sm)',
-            marginBottom: '1rem',
-            fontSize: '0.85rem',
+            padding: '0.65rem 0.85rem',
+            borderRadius: 'var(--radius-xs)',
+            marginBottom: '1.25rem',
+            fontSize: '0.8rem',
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
           }}>
-            <AlertCircle size={16} />
+            <AlertCircle size={14} />
             <span>{error}</span>
           </div>
         )}
@@ -134,112 +118,111 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.35rem', fontWeight: '500' }}>
-              Email Address
+            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontFamily: 'var(--font-mono)' }}>
+              EMAIL
             </label>
-            <div style={{ position: 'relative' }}>
-              <Mail size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="critic@cinema.com"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 0.75rem 0.75rem 2.4rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  color: '#FFFFFF',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                }}
-              />
-            </div>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="critic@cinema.com"
+              style={{
+                width: '100%',
+                padding: '0.65rem 0.85rem',
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-xs)',
+                color: 'var(--text-primary)',
+                fontSize: '0.85rem',
+                outline: 'none',
+                fontFamily: 'inherit',
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'var(--border-accent)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border-subtle)'}
+            />
           </div>
 
           {isRegister && (
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.35rem', fontWeight: '500' }}>
-                Username
+              <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontFamily: 'var(--font-mono)' }}>
+                USERNAME
               </label>
-              <div style={{ position: 'relative' }}>
-                <User size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Cinephile_99"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 0.75rem 0.75rem 2.4rem',
-                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: 'var(--radius-md)',
-                    color: '#FFFFFF',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                  }}
-                />
-              </div>
+              <input
+                type="text"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Cinephile_99"
+                style={{
+                  width: '100%',
+                  padding: '0.65rem 0.85rem',
+                  backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                  border: '1px solid var(--border-subtle)',
+                  borderRadius: 'var(--radius-xs)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.85rem',
+                  outline: 'none',
+                  fontFamily: 'inherit',
+                }}
+                onFocus={(e) => e.target.style.borderColor = 'var(--border-accent)'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--border-subtle)'}
+              />
             </div>
           )}
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.35rem', fontWeight: '500' }}>
-              Password
+            <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontFamily: 'var(--font-mono)' }}>
+              PASSWORD
             </label>
-            <div style={{ position: 'relative' }}>
-              <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-              <input
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{
-                  width: '100%',
-                  padding: '0.75rem 0.75rem 0.75rem 2.4rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  color: '#FFFFFF',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                }}
-              />
-            </div>
+            <input
+              type="password"
+              required
+              minLength={6}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              style={{
+                width: '100%',
+                padding: '0.65rem 0.85rem',
+                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-xs)',
+                color: 'var(--text-primary)',
+                fontSize: '0.85rem',
+                outline: 'none',
+                fontFamily: 'inherit',
+              }}
+              onFocus={(e) => e.target.style.borderColor = 'var(--border-accent)'}
+              onBlur={(e) => e.target.style.borderColor = 'var(--border-subtle)'}
+            />
           </div>
 
           <button
             type="submit"
             disabled={submitting}
-            className="btn-marquee"
+            className="btn-editorial-primary"
             style={{
               width: '100%',
               justifyContent: 'center',
               marginTop: '0.5rem',
-              padding: '0.85rem',
-              opacity: submitting ? 0.7 : 1,
+              padding: '0.75rem',
+              opacity: submitting ? 0.6 : 1,
             }}
           >
-            <Sparkles size={16} />
-            <span>{submitting ? 'Please wait...' : isRegister ? 'Create Free Account' : 'Sign In'}</span>
+            <span>{submitting ? 'Authenticating...' : isRegister ? 'Create Account' : 'Sign In'}</span>
           </button>
         </form>
 
-        {/* Toggle Mode */}
-        <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+        {/* Toggle */}
+        <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
           {isRegister ? (
             <span>
-              Already have an account?{' '}
+              Already registered?{' '}
               <button
                 type="button"
                 onClick={() => { setIsRegister(false); setError(''); }}
-                style={{ background: 'none', border: 'none', color: 'var(--cinema-gold)', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-primary)', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline' }}
               >
                 Sign In
               </button>
@@ -250,7 +233,7 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }) => {
               <button
                 type="button"
                 onClick={() => { setIsRegister(true); setError(''); }}
-                style={{ background: 'none', border: 'none', color: 'var(--cinema-gold)', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-primary)', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline' }}
               >
                 Create an Account
               </button>

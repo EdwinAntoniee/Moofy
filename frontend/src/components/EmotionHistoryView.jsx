@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { History, Trash2, ArrowRight, Sparkles, Popcorn, Film } from 'lucide-react';
+import { ArrowRight, Trash2 } from 'lucide-react';
 import { api } from '../services/api';
 
 const EMOTION_COLORS = {
-  Joy: '#F59E0B',
-  Love: '#EC4899',
-  Surprise: '#A855F7',
-  Sadness: '#3B82F6',
-  Fear: '#10B981',
-  Anger: '#EF4444',
+  Joy: 'var(--emo-joy)',
+  Love: 'var(--emo-love)',
+  Surprise: 'var(--emo-surprise)',
+  Sadness: 'var(--emo-sadness)',
+  Fear: 'var(--emo-fear)',
+  Anger: 'var(--emo-anger)',
 };
 
 export const EmotionHistoryView = ({ onReplaySearch, onOpenDetails }) => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   const loadHistory = async () => {
     try {
@@ -22,7 +21,7 @@ export const EmotionHistoryView = ({ onReplaySearch, onOpenDetails }) => {
       const data = await api.getHistory();
       setHistory(data.items || []);
     } catch (err) {
-      setError(err.message || 'Failed to load emotion history');
+      console.error('Failed to load history', err);
     } finally {
       setLoading(false);
     }
@@ -38,12 +37,12 @@ export const EmotionHistoryView = ({ onReplaySearch, onOpenDetails }) => {
       await api.deleteHistoryItem(id);
       setHistory((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
-      alert('Failed to delete item');
+      alert('Failed to delete entry');
     }
   };
 
   const handleClearAll = async () => {
-    if (!window.confirm('Are you sure you want to clear your entire emotion history?')) return;
+    if (!window.confirm('Clear all logged emotion searches?')) return;
     try {
       await api.clearHistory();
       setHistory([]);
@@ -54,72 +53,55 @@ export const EmotionHistoryView = ({ onReplaySearch, onOpenDetails }) => {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '900px', margin: '3rem auto', textAlign: 'center', padding: '2rem' }}>
-        <Sparkles size={32} className="animate-spin" color="var(--cinema-gold)" style={{ margin: '0 auto 1rem auto' }} />
-        <p style={{ color: 'var(--text-secondary)' }}>Loading your cinematic emotion timeline...</p>
+      <div style={{ maxWidth: '850px', margin: '4rem auto', textAlign: 'center', color: 'var(--text-muted)' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>Loading timeline...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: '900px', margin: '2rem auto', padding: '0 1.5rem' }}>
-      {/* View Header */}
+    <div style={{ maxWidth: '850px', margin: '2.5rem auto', padding: '0 1rem' }}>
+      {/* Header */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '2rem',
-        paddingBottom: '1rem',
-        borderBottom: '1px solid rgba(255, 215, 0, 0.15)',
+        alignItems: 'baseline',
+        flexWrap: 'wrap',
+        gap: '0.75rem',
+        marginBottom: '1.5rem',
+        paddingBottom: '0.85rem',
+        borderBottom: '1px solid var(--border-subtle)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '12px',
-            backgroundColor: 'rgba(229, 9, 20, 0.15)',
-            border: '1px solid var(--marquee-red)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <History size={20} color="var(--marquee-red)" />
-          </div>
-          <div>
-            <h2 style={{ fontFamily: 'var(--font-cinema)', fontSize: '1.4rem', fontWeight: '800', color: '#FFFFFF' }}>
-              EMOTION TIMELINE
-            </h2>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              A journal of how you were feeling and the films recommended for you
-            </p>
-          </div>
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.2rem, 3vw, 1.6rem)', fontWeight: '600', fontStyle: 'italic', color: 'var(--text-primary)' }}>
+            Moods History
+          </h2>
         </div>
 
         {history.length > 0 && (
           <button
             onClick={handleClearAll}
-            className="btn-secondary"
-            style={{ fontSize: '0.8rem', color: '#F87171', borderColor: 'rgba(248, 113, 113, 0.3)' }}
+            className="btn-editorial-secondary"
+            style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}
           >
-            <Trash2 size={14} />
-            <span>Clear History</span>
+            <Trash2 size={13} />
+            <span>Clear Timeline</span>
           </button>
         )}
       </div>
 
-      {/* History Items List */}
+      {/* History List */}
       {history.length === 0 ? (
-        <div className="theatre-card" style={{ padding: '3rem', textAlign: 'center' }}>
-          <Popcorn size={48} color="var(--cinema-gold)" className="animate-popcorn" style={{ margin: '0 auto 1rem auto' }} />
-          <h3 style={{ fontFamily: 'var(--font-cinema)', fontSize: '1.2rem', color: '#FFFFFF', marginBottom: '0.5rem' }}>
-            No Emotion Searches Recorded Yet
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto 1.5rem auto' }}>
-            Head over to Discovery, express what you're feeling, and your emotional journey will be chronicled here.
+        <div className="editorial-card" style={{ padding: '3.5rem 2rem', textAlign: 'center' }}>
+          <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+            No searches recorded yet.
+          </p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+            Searches conducted while signed in are chronologically archived here.
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {history.map((item) => {
             const dateStr = new Date(item.created_at).toLocaleDateString(undefined, {
               month: 'short',
@@ -128,35 +110,34 @@ export const EmotionHistoryView = ({ onReplaySearch, onOpenDetails }) => {
               hour: '2-digit',
               minute: '2-digit',
             });
-            const emoColor = EMOTION_COLORS[item.detected_emotion] || 'var(--cinema-gold)';
+            const emoColor = EMOTION_COLORS[item.detected_emotion] || 'var(--accent-gold)';
 
             return (
               <div
                 key={item.id}
-                className="theatre-card"
+                className="editorial-card"
                 style={{
                   padding: '1.5rem',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '1rem',
                 }}
               >
-                {/* Entry Top Header */}
+                {/* Meta Row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                     <span style={{
-                      backgroundColor: 'rgba(0,0,0,0.6)',
-                      border: `1px solid ${emoColor}`,
+                      border: '1px solid var(--border-subtle)',
                       color: emoColor,
-                      padding: '3px 10px',
-                      borderRadius: 'var(--radius-full)',
-                      fontSize: '0.75rem',
-                      fontWeight: '700',
+                      padding: '2px 8px',
+                      borderRadius: 'var(--radius-xs)',
+                      fontSize: '0.7rem',
+                      fontWeight: '600',
+                      fontFamily: 'var(--font-mono)',
                     }}>
                       ● {item.detected_emotion}
                     </span>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                       {dateStr}
                     </span>
                   </div>
@@ -164,11 +145,11 @@ export const EmotionHistoryView = ({ onReplaySearch, onOpenDetails }) => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <button
                       onClick={() => onReplaySearch(item.prompt, item.alpha)}
-                      className="btn-marquee"
-                      style={{ padding: '0.35rem 0.85rem', fontSize: '0.75rem' }}
+                      className="btn-editorial-secondary"
+                      style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
                     >
-                      <span>Re-explore in Cinema</span>
-                      <ArrowRight size={13} />
+                      <span>Re-explore</span>
+                      <ArrowRight size={12} />
                     </button>
 
                     <button
@@ -178,71 +159,60 @@ export const EmotionHistoryView = ({ onReplaySearch, onOpenDetails }) => {
                         border: 'none',
                         color: 'var(--text-muted)',
                         cursor: 'pointer',
-                        padding: '6px',
-                        display: 'flex',
-                        alignItems: 'center',
+                        padding: '4px',
                       }}
-                      title="Delete this entry"
+                      title="Delete entry"
                     >
-                      <Trash2 size={15} />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
 
                 {/* Prompt Quote */}
                 <div style={{
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                  padding: '0.85rem 1rem',
-                  borderRadius: 'var(--radius-md)',
-                  borderLeft: `3px solid ${emoColor}`,
                   color: 'var(--text-primary)',
                   fontSize: '0.95rem',
+                  fontFamily: 'var(--font-serif)',
                   fontStyle: 'italic',
+                  lineHeight: '1.5',
+                  paddingLeft: '0.75rem',
+                  borderLeft: `2px solid ${emoColor}`,
                 }}>
                   "{item.prompt}"
                 </div>
 
-                {/* Recommended Movies Mini Grid */}
+                {/* Mini Film Strips */}
                 {item.recommendations && item.recommendations.length > 0 && (
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem', fontWeight: '600' }}>
-                      Recommended Films ({item.recommendations.length}):
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.75rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontFamily: 'var(--font-mono)', display: 'block', marginBottom: '0.5rem' }}>
+                      Recommended Films ({item.recommendations.length})
+                    </span>
+                    <div style={{ display: 'flex', gap: '0.65rem', overflowX: 'auto', paddingBottom: '0.4rem' }}>
                       {item.recommendations.slice(0, 6).map((movie) => {
                         const posterUrl = movie.poster_path ? `https://image.tmdb.org/t/p/w200${movie.poster_path}` : null;
                         return (
                           <div
                             key={movie.movie_id}
                             onClick={() => onOpenDetails(movie)}
-                            style={{
-                              width: '90px',
-                              flexShrink: 0,
-                              cursor: 'pointer',
-                              textAlign: 'center',
-                            }}
+                            style={{ width: '85px', flexShrink: 0, cursor: 'pointer' }}
                           >
                             <div style={{
-                              width: '90px',
-                              height: '130px',
-                              borderRadius: '8px',
-                              backgroundColor: '#1E111A',
+                              width: '85px',
+                              height: '120px',
+                              borderRadius: 'var(--radius-xs)',
+                              backgroundColor: '#151518',
                               overflow: 'hidden',
-                              marginBottom: '0.35rem',
-                              border: '1px solid rgba(255,255,255,0.1)',
+                              marginBottom: '0.25rem',
+                              border: '1px solid var(--border-subtle)',
                             }}>
-                              {posterUrl ? (
+                              {posterUrl && (
                                 <img src={posterUrl} alt={movie.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              ) : (
-                                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                  <Film size={20} color="var(--marquee-red)" />
-                                </div>
                               )}
                             </div>
                             <div style={{
                               fontSize: '0.7rem',
-                              fontWeight: '600',
-                              color: '#FFFFFF',
+                              color: 'var(--text-secondary)',
+                              fontFamily: 'var(--font-serif)',
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from datetime import datetime
 import json
 from typing import Optional
 
@@ -26,21 +27,43 @@ def get_recommendations(
         filter_emotion=req.filter_emotion
     )
 
-    # If the user is logged in, automatically save this discovery to their Emotion History
+    # If the user is logged in, automatically save or update this discovery in their Emotion History
     if current_user is not None:
         try:
             emotion_scores_dict = {item.emotion: item.score for item in response.emotion_breakdown}
             movies_list_dict = [m.model_dump() for m in response.movies]
+            clean_prompt = req.prompt.strip()
 
-            history_entry = EmotionSearchHistory(
-                user_id=current_user.id,
-                prompt=req.prompt,
-                detected_emotion=response.primary_emotion,
-                emotion_scores_json=json.dumps(emotion_scores_dict),
-                recommendations_json=json.dumps(movies_list_dict),
-                alpha=req.alpha
+            # Check if an entry with the identical prompt already exists for this user
+            existing_entry = (
+                db.query(EmotionSearchHistory)
+                .filter(
+                    EmotionSearchHistory.user_id == current_user.id,
+                    EmotionSearchHistory.prompt == clean_prompt
+                )
+                .first()
             )
-            db.add(history_entry)
+
+            if existing_entry:
+                # Update the existing entry with latest emotion, movies, alpha, and refresh timestamp
+                existing_entry.detected_emotion = response.primary_emotion
+                existing_entry.emotion_scores_json = json.dumps(emotion_scores_dict)
+                existing_entry.recommendations_json = json.dumps(movies_list_dict)
+                existing_entry.alpha = req.alpha
+                existing_entry.created_at = datetime.utcnow()
+            else:
+                # Create a new unique history record
+                history_entry = EmotionSearchHistory(
+                    user_id=current_user.id,
+                    prompt=clean_prompt,
+                    detected_emotion=response.primary_emotion,
+                    emotion_scores_json=json.dumps(emotion_scores_dict),
+                    recommendations_json=json.dumps(movies_list_dict),
+                    alpha=req.alpha,
+                    created_at=datetime.utcnow()
+                )
+                db.add(history_entry)
+
             db.commit()
         except Exception as e:
             print(f"[Warning] Failed to log emotion search history: {e}")

@@ -1,41 +1,42 @@
 :root {
-  --bg-void: #070508;
-  --bg-theatre: #0f0a0e;
-  --bg-card: rgba(26, 16, 22, 0.75);
-  --bg-card-hover: rgba(38, 22, 32, 0.9);
-  --bg-glass: rgba(18, 11, 16, 0.85);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-red: rgba(229, 9, 20, 0.35);
-  --border-gold: rgba(255, 215, 0, 0.3);
+  --bg-base: #0c0c0e;
+  --bg-surface: rgba(255, 255, 255, 0.03);
+  --bg-surface-elevated: rgba(255, 255, 255, 0.06);
+  --bg-surface-hover: rgba(255, 255, 255, 0.09);
+  --bg-modal: #111114;
 
-  --velvet-red: #8b0000;
-  --marquee-red: #e50914;
-  --cinema-gold: #ffd700;
-  --popcorn-yellow: #fef08a;
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.18);
+  --border-accent: rgba(200, 170, 118, 0.45);
 
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
+  --accent-gold: #c8aa76;
+  --accent-sand: #e6dfd3;
+  --accent-red: #9e2a2a;
 
-  --font-cinema: 'Cinzel', serif;
-  --font-serif: 'DM Serif Display', Georgia, serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --text-primary: #f4f4ee;
+  --text-secondary: #c4c4bc;
+  --text-muted: #888880;
 
-  /* Emotion Palette */
-  --emo-joy: #f59e0b;
-  --emo-love: #ec4899;
-  --emo-surprise: #a855f7;
-  --emo-sadness: #3b82f6;
-  --emo-fear: #10b981;
-  --emo-anger: #ef4444;
+  --font-serif: 'Bodoni Moda', 'Cinzel', Georgia, serif;
+  --font-editorial: 'Bodoni Moda', 'Cinzel', serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
+  /* Editorial Soft Emotion Palette */
+  --emo-joy: #dca365;
+  --emo-love: #cf8484;
+  --emo-surprise: #a89bc2;
+  --emo-sadness: #7890a8;
+  --emo-fear: #739682;
+  --emo-anger: #bf6363;
+
+  --radius-xs: 4px;
   --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-full: 9999px;
 
-  --shadow-theatre: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(229, 9, 20, 0.15);
-  --shadow-spotlight: 0 0 100px rgba(255, 215, 0, 0.15), 0 0 120px rgba(229, 9, 20, 0.2);
+  --transition-smooth: all 0.25s cubic-bezier(0.2, 0, 0, 1);
 }
 
 * {
@@ -46,158 +47,237 @@
 
 html, body {
   min-height: 100vh;
-  background-color: var(--bg-void);
+  background-color: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-sans);
   overflow-x: hidden;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Atmospheric Theatre Background with Center Spotlight */
-.theatre-stage {
+/* ============================================================
+   EDITORIAL STAGE
+   ============================================================ */
+.editorial-stage {
   position: relative;
   min-height: 100vh;
-  background-color: var(--bg-void);
-  background-image: 
-    radial-gradient(ellipse 65% 55% at 50% -5%, rgba(255, 215, 0, 0.12) 0%, rgba(229, 9, 20, 0.08) 45%, transparent 75%),
-    radial-gradient(circle at 10% 90%, rgba(139, 0, 0, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 90% 90%, rgba(229, 9, 20, 0.08) 0%, transparent 40%);
-  background-attachment: fixed;
+  background-color: var(--bg-base);
 }
 
-/* Film Tape Border Decorative Ribbon */
-.film-tape {
-  height: 20px;
-  width: 100%;
-  background: repeating-linear-gradient(
-    90deg,
-    #110c10 0px,
-    #110c10 16px,
-    #ffffff 16px,
-    #ffffff 22px,
-    #110c10 22px,
-    #110c10 38px
-  );
-  border-top: 1px solid rgba(255, 215, 0, 0.2);
-  border-bottom: 1px solid rgba(255, 215, 0, 0.2);
-  opacity: 0.7;
+/* ============================================================
+   HERO CTA SECTION — Scoped container for CTA & Search Input
+   ============================================================ */
+.hero-cta-section {
+  position: relative;
+  overflow: hidden;
+  padding-bottom: 3.5rem;
+  background-color: #0c0c0e;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Spotlight Cone Effect */
-.spotlight-cone {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80vw;
-  max-width: 900px;
-  height: 500px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(255, 230, 150, 0.15) 0%, rgba(229, 9, 20, 0.08) 40%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
+/* ============================================================
+   FILM STRIP ANIMATIONS
+   Frame width: 210px + separator stripe: 16px = 226px per unit
+   56 frames × 226px = 12656px per loop cycle
+   ============================================================ */
+@keyframes filmScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-12656px); }
 }
 
-/* Glassmorphic Theatre Card */
-.theatre-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+@keyframes filmScrollReverse {
+  from { transform: translateX(-12656px); }
+  to   { transform: translateX(0); }
 }
 
-.theatre-card:hover {
-  border-color: var(--border-red);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(229, 9, 20, 0.2);
-  transform: translateY(-3px);
-}
-
-/* Marquee Glow Button */
-.btn-marquee {
-  background: linear-gradient(135deg, #e50914 0%, #b8000b 100%);
-  color: #ffffff;
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.75rem 1.5rem;
+/* ============================================================
+   MINIMALIST EDITORIAL CARD
+   ============================================================ */
+.editorial-card {
+  background: rgba(16, 16, 20, 0.92);
+  border: 1px solid var(--border-medium);
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 20px rgba(229, 9, 20, 0.4);
+  transition: var(--transition-smooth);
+}
+
+.editorial-card:hover {
+  background: rgba(22, 22, 28, 0.96);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================================
+   PRIMARY EDITORIAL BUTTON
+   ============================================================ */
+.btn-editorial-primary {
+  background-color: #f4f4ee;
+  color: #0c0c0e;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid #f4f4ee;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.2s ease;
+  transition: var(--transition-smooth);
 }
 
-.btn-marquee:hover {
-  background: linear-gradient(135deg, #ff1a26 0%, #d1000d 100%);
-  box-shadow: 0 6px 28px rgba(229, 9, 20, 0.6);
+.btn-editorial-primary:hover {
+  background-color: #ffffff;
+  box-shadow: 0 4px 20px rgba(244, 244, 238, 0.25);
   transform: translateY(-1px);
 }
 
-.btn-marquee:active {
-  transform: translateY(1px);
+.btn-editorial-primary:active {
+  transform: translateY(0);
 }
 
-.btn-secondary {
-  background: rgba(255, 255, 255, 0.06);
+/* ============================================================
+   SECONDARY EDITORIAL BUTTON
+   ============================================================ */
+.btn-editorial-secondary {
+  background-color: rgba(255, 255, 255, 0.04);
   color: var(--text-primary);
   font-weight: 500;
-  font-size: 0.95rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+  padding: 0.65rem 1.15rem;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--border-subtle);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.2s ease;
+  transition: var(--transition-smooth);
 }
 
-.btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.2);
+.btn-editorial-secondary:hover {
+  background-color: var(--bg-surface-elevated);
+  border-color: var(--border-medium);
+  color: #ffffff;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-void);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(229, 9, 20, 0.4);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(229, 9, 20, 0.7);
-}
-
-/* Pulse animation for popcorn and live badges */
-@keyframes popcorn-pop {
-  0% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(1.15) rotate(6deg); }
-  100% { transform: scale(1) rotate(0deg); }
+/* ============================================================
+   NAV LINK
+   ============================================================ */
+.nav-link {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--transition-smooth);
 }
 
-.animate-popcorn {
-  animation: popcorn-pop 2.5s infinite ease-in-out;
+.nav-link:hover {
+  color: var(--text-primary);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
-@keyframes marquee-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+.nav-link.active {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
-.shimmer-text {
-  background: linear-gradient(90deg, #ffd700 0%, #ffffff 50%, #ffd700 100%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: marquee-shimmer 4s infinite linear;
+/* ============================================================
+   QUICK PROMPT CHIPS
+   ============================================================ */
+.quick-prompt-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.95rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #d8d8d0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  font-family: var(--font-sans);
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+}
+
+.quick-prompt-chip:hover {
+  border-color: rgba(200, 170, 118, 0.6);
+  color: #ffffff;
+  background: rgba(200, 170, 118, 0.15);
+  transform: translateY(-1px);
+}
+
+.quick-prompt-chip:active {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   CUSTOM SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+/* ============================================================
+   RESPONSIVE GRID & MOBILE OPTIMIZATIONS
+   ============================================================ */
+.editorial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .editorial-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .editorial-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .nav-text {
+    display: none;
+  }
+
+  .btn-editorial-primary, .btn-editorial-secondary {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes subtle-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: subtle-fade 0.45s ease-out forwards;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-spin {
+  animation: spin 1.2s linear infinite;
 }

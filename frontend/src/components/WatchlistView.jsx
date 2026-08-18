@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Bookmark, Check, Trash2, Star, Eye, Calendar, Film, Popcorn } from 'lucide-react';
+import { Bookmark, Check, Trash2, Star, Calendar } from 'lucide-react';
 import { api } from '../services/api';
 
 const EMOTION_COLORS = {
-  Joy: '#F59E0B',
-  Love: '#EC4899',
-  Surprise: '#A855F7',
-  Sadness: '#3B82F6',
-  Fear: '#10B981',
-  Anger: '#EF4444',
+  Joy: 'var(--emo-joy)',
+  Love: 'var(--emo-love)',
+  Surprise: 'var(--emo-surprise)',
+  Sadness: 'var(--emo-sadness)',
+  Fear: 'var(--emo-fear)',
+  Anger: 'var(--emo-anger)',
 };
 
 export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
@@ -32,17 +32,55 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
     loadWatchlist();
   }, []);
 
-  const handleToggleStatus = async (item, e) => {
+  // Handle clicking the "Queue" button on a watchlist item
+  const handleQueueClick = async (item, e) => {
     e.stopPropagation();
-    const newStatus = item.status === 'watched' ? 'plan_to_watch' : 'watched';
-    try {
-      await api.updateWatchlistStatus(item.movie_id, newStatus);
-      setWatchlist((prev) =>
-        prev.map((m) => (m.movie_id === item.movie_id ? { ...m, status: newStatus } : m))
-      );
-      onWatchlistUpdated?.();
-    } catch (err) {
-      alert('Failed to update status');
+    if (item.status === 'plan_to_watch') {
+      // Unqueue / Remove from watchlist
+      try {
+        await api.removeFromWatchlist(item.movie_id);
+        setWatchlist((prev) => prev.filter((m) => m.movie_id !== item.movie_id));
+        onWatchlistUpdated?.();
+      } catch (err) {
+        alert('Failed to unqueue film');
+      }
+    } else {
+      // Move from watched -> plan_to_watch
+      try {
+        await api.updateWatchlistStatus(item.movie_id, 'plan_to_watch');
+        setWatchlist((prev) =>
+          prev.map((m) => (m.movie_id === item.movie_id ? { ...m, status: 'plan_to_watch' } : m))
+        );
+        onWatchlistUpdated?.();
+      } catch (err) {
+        alert('Failed to update status');
+      }
+    }
+  };
+
+  // Handle clicking the "Watched" button on a watchlist item
+  const handleWatchedClick = async (item, e) => {
+    e.stopPropagation();
+    if (item.status === 'watched') {
+      // Unmark watched / Remove from watchlist
+      try {
+        await api.removeFromWatchlist(item.movie_id);
+        setWatchlist((prev) => prev.filter((m) => m.movie_id !== item.movie_id));
+        onWatchlistUpdated?.();
+      } catch (err) {
+        alert('Failed to unmark watched');
+      }
+    } else {
+      // Move from plan_to_watch -> watched
+      try {
+        await api.updateWatchlistStatus(item.movie_id, 'watched');
+        setWatchlist((prev) =>
+          prev.map((m) => (m.movie_id === item.movie_id ? { ...m, status: 'watched' } : m))
+        );
+        onWatchlistUpdated?.();
+      } catch (err) {
+        alert('Failed to mark as watched');
+      }
     }
   };
 
@@ -66,61 +104,44 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '1000px', margin: '3rem auto', textAlign: 'center', padding: '2rem' }}>
-        <Popcorn size={32} className="animate-popcorn" color="var(--cinema-gold)" style={{ margin: '0 auto 1rem auto' }} />
-        <p style={{ color: 'var(--text-secondary)' }}>Loading your cinema watchlist...</p>
+      <div style={{ maxWidth: '1000px', margin: '4rem auto', textAlign: 'center', color: 'var(--text-muted)' }}>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>Loading archive...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '2rem auto', padding: '0 1.5rem' }}>
+    <div style={{ maxWidth: '1100px', margin: '2.5rem auto', padding: '0 1rem' }}>
       {/* Header */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'baseline',
         flexWrap: 'wrap',
-        gap: '1rem',
+        gap: '0.75rem',
         marginBottom: '1.5rem',
-        paddingBottom: '1rem',
-        borderBottom: '1px solid rgba(255, 215, 0, 0.15)',
+        paddingBottom: '0.85rem',
+        borderBottom: '1px solid var(--border-subtle)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '12px',
-            backgroundColor: 'rgba(255, 215, 0, 0.15)',
-            border: '1px solid var(--cinema-gold)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <Bookmark size={20} color="var(--cinema-gold)" />
-          </div>
-          <div>
-            <h2 style={{ fontFamily: 'var(--font-cinema)', fontSize: '1.4rem', fontWeight: '800', color: '#FFFFFF' }}>
-              PERSONAL WATCHLIST
-            </h2>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              {watchlist.length} film{watchlist.length !== 1 ? 's' : ''} saved in your vault
-            </p>
-          </div>
+        <div>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.2rem, 3vw, 1.6rem)', fontWeight: '600', fontStyle: 'italic', color: 'var(--text-primary)' }}>
+            Personal Watchlist
+          </h2>
         </div>
 
         {/* Filter Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', backgroundColor: 'rgba(255,255,255,0.04)', padding: '4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+        <div style={{ display: 'flex', gap: '0.25rem', backgroundColor: 'var(--bg-surface)', padding: '3px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
           <button
             onClick={() => setStatusFilter('all')}
             style={{
-              background: statusFilter === 'all' ? 'var(--marquee-red)' : 'transparent',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '0.35rem 0.85rem',
-              borderRadius: '6px',
-              fontSize: '0.8rem',
-              fontWeight: '600',
+              background: statusFilter === 'all' ? 'var(--bg-surface-elevated)' : 'transparent',
+              color: statusFilter === 'all' ? 'var(--text-primary)' : 'var(--text-muted)',
+              border: statusFilter === 'all' ? '1px solid var(--border-subtle)' : 'none',
+              padding: '0.35rem 0.65rem',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.72rem',
+              fontWeight: '500',
+              fontFamily: 'ui-monospace, SFMono-Regular, monospace',
               cursor: 'pointer',
             }}
           >
@@ -129,28 +150,30 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
           <button
             onClick={() => setStatusFilter('plan_to_watch')}
             style={{
-              background: statusFilter === 'plan_to_watch' ? 'var(--marquee-red)' : 'transparent',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '0.35rem 0.85rem',
-              borderRadius: '6px',
-              fontSize: '0.8rem',
-              fontWeight: '600',
+              background: statusFilter === 'plan_to_watch' ? 'var(--bg-surface-elevated)' : 'transparent',
+              color: statusFilter === 'plan_to_watch' ? 'var(--text-primary)' : 'var(--text-muted)',
+              border: statusFilter === 'plan_to_watch' ? '1px solid var(--border-subtle)' : 'none',
+              padding: '0.35rem 0.65rem',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.72rem',
+              fontWeight: '500',
+              fontFamily: 'ui-monospace, SFMono-Regular, monospace',
               cursor: 'pointer',
             }}
           >
-            Plan to Watch ({planCount})
+            Queue ({planCount})
           </button>
           <button
             onClick={() => setStatusFilter('watched')}
             style={{
-              background: statusFilter === 'watched' ? 'var(--marquee-red)' : 'transparent',
-              color: '#FFFFFF',
-              border: 'none',
-              padding: '0.35rem 0.85rem',
-              borderRadius: '6px',
-              fontSize: '0.8rem',
-              fontWeight: '600',
+              background: statusFilter === 'watched' ? 'var(--bg-surface-elevated)' : 'transparent',
+              color: statusFilter === 'watched' ? 'var(--text-primary)' : 'var(--text-muted)',
+              border: statusFilter === 'watched' ? '1px solid var(--border-subtle)' : 'none',
+              padding: '0.35rem 0.65rem',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.72rem',
+              fontWeight: '500',
+              fontFamily: 'ui-monospace, SFMono-Regular, monospace',
               cursor: 'pointer',
             }}
           >
@@ -161,31 +184,27 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="theatre-card" style={{ padding: '3rem', textAlign: 'center' }}>
-          <Film size={48} color="var(--marquee-red)" style={{ margin: '0 auto 1rem auto', opacity: 0.5 }} />
-          <h3 style={{ fontFamily: 'var(--font-cinema)', fontSize: '1.2rem', color: '#FFFFFF', marginBottom: '0.5rem' }}>
-            No Movies in this View
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto' }}>
-            Browse through Discovery and click "+ Watchlist" on any film to bookmark it here.
+        <div className="editorial-card" style={{ padding: '3.5rem 2rem', textAlign: 'center' }}>
+          <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+            No films saved in this view.
+          </p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '380px', margin: '0 auto' }}>
+            Explore films through Discovery and add them to your Queue or mark them as Watched.
           </p>
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-          gap: '1.5rem',
-        }}>
+        <div className="editorial-grid">
           {filtered.map((item) => {
             const posterUrl = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null;
             const releaseYear = item.release_date ? item.release_date.substring(0, 4) : '';
-            const emoColor = EMOTION_COLORS[item.emotion_label] || 'var(--cinema-gold)';
+            const emoColor = EMOTION_COLORS[item.emotion_label] || 'var(--accent-gold)';
+            const isQueued = item.status === 'plan_to_watch';
             const isWatched = item.status === 'watched';
 
             return (
               <div
                 key={item.id}
-                className="theatre-card"
+                className="editorial-card"
                 onClick={() => onOpenDetails(item)}
                 style={{
                   display: 'flex',
@@ -193,11 +212,10 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
                   height: '100%',
                   overflow: 'hidden',
                   cursor: 'pointer',
-                  border: isWatched ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
                 }}
               >
                 {/* Poster Box */}
-                <div style={{ position: 'relative', width: '100%', paddingTop: '145%', backgroundColor: '#180E15' }}>
+                <div style={{ position: 'relative', width: '100%', paddingTop: '148%', backgroundColor: '#151518' }}>
                   {posterUrl ? (
                     <img
                       src={posterUrl}
@@ -208,12 +226,13 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',
-                        filter: isWatched ? 'grayscale(25%)' : 'none',
+                        filter: isWatched ? 'grayscale(35%)' : 'none',
+                        opacity: isWatched ? 0.75 : 1,
                       }}
                     />
                   ) : (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Film size={36} color="var(--marquee-red)" style={{ opacity: 0.4 }} />
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontFamily: 'var(--font-serif)' }}>
+                      {item.title}
                     </div>
                   )}
 
@@ -222,54 +241,38 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
                     position: 'absolute',
                     top: '10px',
                     left: '10px',
-                    backgroundColor: isWatched ? 'rgba(16, 185, 129, 0.85)' : 'rgba(0, 0, 0, 0.75)',
+                    backgroundColor: 'rgba(12, 12, 14, 0.85)',
                     backdropFilter: 'blur(8px)',
-                    border: isWatched ? '1px solid #10B981' : '1px solid rgba(255, 215, 0, 0.3)',
-                    padding: '3px 8px',
-                    borderRadius: '6px',
-                    fontSize: '0.75rem',
-                    fontWeight: '700',
-                    color: '#FFFFFF',
+                    border: '1px solid var(--border-subtle)',
+                    padding: '2px 7px',
+                    borderRadius: 'var(--radius-xs)',
+                    fontSize: '0.7rem',
+                    fontWeight: '600',
+                    color: isWatched ? 'var(--accent-gold)' : 'var(--text-primary)',
+                    fontFamily: 'var(--font-mono)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
                   }}>
-                    {isWatched ? <Check size={13} /> : <Star size={13} fill="var(--cinema-gold)" color="var(--cinema-gold)" />}
-                    <span>{isWatched ? 'Watched' : item.vote_average ? item.vote_average.toFixed(1) : '7.0'}</span>
+                    {isWatched ? <Check size={11} /> : <Star size={11} fill="var(--accent-gold)" color="var(--accent-gold)" />}
+                    <span>{isWatched ? 'WATCHED' : item.vote_average ? item.vote_average.toFixed(1) : '7.0'}</span>
                   </div>
-
-                  {item.emotion_label && (
-                    <div style={{
-                      position: 'absolute',
-                      bottom: '10px',
-                      left: '10px',
-                      backgroundColor: 'rgba(0,0,0,0.8)',
-                      border: `1px solid ${emoColor}`,
-                      padding: '2px 8px',
-                      borderRadius: 'var(--radius-full)',
-                      fontSize: '0.7rem',
-                      fontWeight: '700',
-                      color: emoColor,
-                    }}>
-                      ● {item.emotion_label}
-                    </div>
-                  )}
                 </div>
 
                 {/* Content */}
                 <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', gap: '0.75rem' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                      <h3 style={{ fontSize: '0.95rem', fontWeight: '700', color: '#FFFFFF', lineHeight: '1.3' }}>
+                      <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-primary)', lineHeight: '1.3' }}>
                         {item.title}
-                      </h3>
+                      </h4>
                       {releaseYear && (
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{releaseYear}</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{releaseYear}</span>
                       )}
                     </div>
 
                     <p style={{
-                      fontSize: '0.8rem',
+                      fontSize: '0.78rem',
                       color: 'var(--text-secondary)',
                       lineHeight: '1.4',
                       display: '-webkit-box',
@@ -277,42 +280,75 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                     }}>
-                      {item.overview || 'No overview available.'}
+                      {item.overview || 'No synopsis recorded.'}
                     </p>
                   </div>
 
-                  {/* Actions */}
-                  <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  {/* Actions - Separate Queue and Watched Buttons */}
+                  <div style={{ display: 'flex', gap: '0.4rem', paddingTop: '0.65rem', borderTop: '1px solid var(--border-subtle)' }}>
+                    {/* Queue Button */}
                     <button
-                      onClick={(e) => handleToggleStatus(item, e)}
+                      onClick={(e) => handleQueueClick(item, e)}
                       style={{
                         flex: 1,
-                        backgroundColor: isWatched ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 215, 0, 0.12)',
-                        border: isWatched ? '1px solid #10B981' : '1px solid rgba(255, 215, 0, 0.4)',
-                        color: isWatched ? '#10B981' : 'var(--cinema-gold)',
-                        padding: '0.4rem',
-                        borderRadius: 'var(--radius-sm)',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
+                        backgroundColor: isQueued ? 'rgba(200, 170, 118, 0.18)' : 'transparent',
+                        border: isQueued ? '1px solid var(--accent-gold)' : '1px solid var(--border-subtle)',
+                        color: isQueued ? 'var(--accent-gold)' : 'var(--text-primary)',
+                        padding: '0.35rem 0.35rem',
+                        borderRadius: 'var(--radius-xs)',
+                        fontSize: '0.7rem',
+                        fontFamily: 'var(--font-mono)',
+                        whiteSpace: 'nowrap',
+                        minWidth: 0,
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        gap: '4px',
+                        gap: '3px',
+                        transition: 'var(--transition-smooth)',
                       }}
+                      title={isQueued ? 'Click to unqueue film' : 'Move to Queue'}
                     >
-                      {isWatched ? <Check size={14} /> : <Eye size={14} />}
-                      <span>{isWatched ? 'Mark Plan to Watch' : 'Mark Watched'}</span>
+                      <Bookmark size={11} fill={isQueued ? 'var(--accent-gold)' : 'none'} style={{ flexShrink: 0 }} />
+                      <span style={{ whiteSpace: 'nowrap' }}>{isQueued ? 'In Queue' : 'Queue'}</span>
                     </button>
 
+                    {/* Watched Button */}
+                    <button
+                      onClick={(e) => handleWatchedClick(item, e)}
+                      style={{
+                        flex: 1,
+                        backgroundColor: isWatched ? 'rgba(120, 180, 140, 0.18)' : 'transparent',
+                        border: isWatched ? '1px solid #739682' : '1px solid var(--border-subtle)',
+                        color: isWatched ? '#a3d4b6' : 'var(--text-primary)',
+                        padding: '0.35rem 0.35rem',
+                        borderRadius: 'var(--radius-xs)',
+                        fontSize: '0.7rem',
+                        fontFamily: 'var(--font-mono)',
+                        whiteSpace: 'nowrap',
+                        minWidth: 0,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '3px',
+                        transition: 'var(--transition-smooth)',
+                      }}
+                      title={isWatched ? 'Click to unmark watched' : 'Mark as Watched'}
+                    >
+                      <Check size={11} strokeWidth={isWatched ? 3 : 2} style={{ flexShrink: 0 }} />
+                      <span style={{ whiteSpace: 'nowrap' }}>{isWatched ? 'Watched' : 'Watched'}</span>
+                    </button>
+
+                    {/* Remove from Vault Button */}
                     <button
                       onClick={(e) => handleRemove(item.movie_id, e)}
                       style={{
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(248, 113, 113, 0.2)',
-                        color: '#F87171',
-                        padding: '0.4rem 0.6rem',
-                        borderRadius: 'var(--radius-sm)',
+                        background: 'transparent',
+                        border: '1px solid var(--border-subtle)',
+                        color: 'var(--text-muted)',
+                        padding: '0.35rem 0.55rem',
+                        borderRadius: 'var(--radius-xs)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
@@ -320,7 +356,7 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
                       }}
                       title="Remove from watchlist"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>

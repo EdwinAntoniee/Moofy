@@ -1,15 +1,6 @@
 import React from 'react';
-import { Star, Bookmark, Check, Info, Film, Sparkles } from 'lucide-react';
+import { Bookmark, Check, Star } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-
-const EMOTION_COLORS = {
-  Joy: '#F59E0B',
-  Love: '#EC4899',
-  Surprise: '#A855F7',
-  Sadness: '#3B82F6',
-  Fear: '#10B981',
-  Anger: '#EF4444',
-};
 
 export const MovieCard = ({
   movie,
@@ -27,20 +18,31 @@ export const MovieCard = ({
 
   const releaseYear = movie.release_date ? movie.release_date.substring(0, 4) : '';
   const matchPercentage = Math.round(movie.hybrid_score * 100);
-  const emotionColor = EMOTION_COLORS[movie.emotion_label] || 'var(--cinema-gold)';
 
-  const handleWatchlistClick = (e) => {
+  const isQueued = isInWatchlist && watchlistStatus === 'plan_to_watch';
+  const isWatched = isInWatchlist && watchlistStatus === 'watched';
+
+  const handleQueueClick = (e) => {
     e.stopPropagation();
     if (isGuest) {
       onOpenAuth?.();
       return;
     }
-    onToggleWatchlist?.(movie);
+    onToggleWatchlist?.(movie, 'plan_to_watch');
+  };
+
+  const handleWatchedClick = (e) => {
+    e.stopPropagation();
+    if (isGuest) {
+      onOpenAuth?.();
+      return;
+    }
+    onToggleWatchlist?.(movie, 'watched');
   };
 
   return (
     <div
-      className="theatre-card"
+      className="editorial-card"
       onClick={() => onOpenDetails(movie)}
       style={{
         display: 'flex',
@@ -48,16 +50,15 @@ export const MovieCard = ({
         height: '100%',
         overflow: 'hidden',
         cursor: 'pointer',
-        position: 'relative',
-        border: '1px solid rgba(255, 255, 255, 0.08)',
+        border: '1px solid var(--border-subtle)',
       }}
     >
       {/* Poster Media Box */}
       <div style={{
         position: 'relative',
         width: '100%',
-        paddingTop: '145%', /* 2:3 aspect ratio */
-        backgroundColor: '#180E15',
+        paddingTop: '148%', /* Classic theatrical aspect ratio */
+        backgroundColor: '#151518',
         overflow: 'hidden',
       }}>
         {posterUrl ? (
@@ -71,9 +72,9 @@ export const MovieCard = ({
               width: '100%',
               height: '100%',
               objectFit: 'cover',
-              transition: 'transform 0.5s ease',
+              transition: 'transform 0.6s cubic-bezier(0.2, 0, 0, 1)',
             }}
-            onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+            onMouseEnter={(e) => e.target.style.transform = 'scale(1.04)'}
             onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
           />
         ) : (
@@ -81,78 +82,71 @@ export const MovieCard = ({
             position: 'absolute',
             inset: 0,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1rem',
+            padding: '1.5rem',
             textAlign: 'center',
-            backgroundColor: '#1E111A',
+            backgroundColor: '#151518',
             color: 'var(--text-muted)',
+            fontFamily: 'var(--font-serif)',
+            fontSize: '1rem',
           }}>
-            <Film size={40} color="var(--marquee-red)" style={{ opacity: 0.5, marginBottom: '0.5rem' }} />
-            <span style={{ fontSize: '0.85rem', fontWeight: '600' }}>{movie.title}</span>
+            {movie.title}
           </div>
         )}
 
-        {/* Rating Badge */}
+        {/* Top Badges */}
         <div style={{
           position: 'absolute',
           top: '10px',
           left: '10px',
-          backgroundColor: 'rgba(0, 0, 0, 0.75)',
-          backdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255, 215, 0, 0.3)',
-          padding: '3px 8px',
-          borderRadius: '6px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          fontSize: '0.75rem',
-          fontWeight: '700',
-          color: 'var(--cinema-gold)',
-        }}>
-          <Star size={12} fill="var(--cinema-gold)" />
-          <span>{movie.vote_average ? movie.vote_average.toFixed(1) : '7.0'}</span>
-        </div>
-
-        {/* Match Percentage Badge */}
-        <div style={{
-          position: 'absolute',
-          top: '10px',
           right: '10px',
-          backgroundColor: 'rgba(229, 9, 20, 0.85)',
-          backdropFilter: 'blur(8px)',
-          padding: '3px 8px',
-          borderRadius: '6px',
-          fontSize: '0.75rem',
-          fontWeight: '700',
-          color: '#FFFFFF',
-          boxShadow: '0 2px 10px rgba(229, 9, 20, 0.5)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          pointerEvents: 'none',
         }}>
-          {matchPercentage}% Match
-        </div>
+          {/* Rating */}
+          <div style={{
+            backgroundColor: 'rgba(12, 12, 14, 0.82)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid var(--border-subtle)',
+            padding: '2px 7px',
+            borderRadius: 'var(--radius-xs)',
+            fontSize: '0.7rem',
+            fontWeight: '600',
+            color: 'var(--text-primary)',
+            fontFamily: 'var(--font-mono)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '3px',
+          }}>
+            <Star size={11} fill="var(--accent-gold)" color="var(--accent-gold)" />
+            <span>{movie.vote_average ? movie.vote_average.toFixed(1) : '7.0'}</span>
+          </div>
 
-        {/* Emotion Label Overlay */}
-        <div style={{
-          position: 'absolute',
-          bottom: '10px',
-          left: '10px',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          backdropFilter: 'blur(6px)',
-          border: `1px solid ${emotionColor}`,
-          padding: '2px 8px',
-          borderRadius: 'var(--radius-full)',
-          fontSize: '0.7rem',
-          fontWeight: '700',
-          color: emotionColor,
-        }}>
-          ● {movie.emotion_label}
+          {/* Match % */}
+          {matchPercentage > 0 && (
+            <div style={{
+              backgroundColor: 'rgba(12, 12, 14, 0.82)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid var(--border-subtle)',
+              padding: '2px 7px',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.7rem',
+              fontWeight: '600',
+              color: 'var(--accent-gold)',
+              fontFamily: 'var(--font-mono)',
+            }}>
+              {matchPercentage}% MATCH
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Card Content Body */}
+      {/* Content Body */}
       <div style={{
-        padding: '1.1rem',
+        padding: '1rem',
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
@@ -160,42 +154,40 @@ export const MovieCard = ({
         gap: '0.75rem',
       }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
-            <h3 style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: '1rem',
-              fontWeight: '700',
-              color: '#FFFFFF',
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.35rem' }}>
+            <h4 style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: '1.05rem',
+              fontWeight: '600',
+              color: 'var(--text-primary)',
               lineHeight: '1.3',
               display: '-webkit-box',
-              WebkitLineClamp: 2,
+              WebkitLineClamp: 1,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
             }}>
               {movie.title}
-            </h3>
+            </h4>
             {releaseYear && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                 {releaseYear}
               </span>
             )}
           </div>
 
-          {/* Genres Pills */}
+          {/* Genres */}
           {movie.genres && movie.genres.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '0.5rem' }}>
-              {movie.genres.slice(0, 3).map((g, i) => (
+              {movie.genres.slice(0, 2).map((g, i) => (
                 <span
                   key={i}
                   style={{
                     fontSize: '0.65rem',
                     color: 'var(--text-secondary)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
+                    fontFamily: 'var(--font-mono)',
                   }}
                 >
-                  {g}
+                  {g}{i < Math.min(movie.genres.length, 2) - 1 ? ' · ' : ''}
                 </span>
               ))}
             </div>
@@ -203,67 +195,79 @@ export const MovieCard = ({
 
           {/* Synopsis Excerpt */}
           <p style={{
-            fontSize: '0.8rem',
+            fontSize: '0.78rem',
             color: 'var(--text-secondary)',
-            lineHeight: '1.4',
+            lineHeight: '1.5',
             display: '-webkit-box',
-            WebkitLineClamp: 3,
+            WebkitLineClamp: 2,
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
           }}>
-            {movie.overview || 'No synopsis available for this film.'}
+            {movie.overview || 'No synopsis available.'}
           </p>
         </div>
 
-        {/* Card Action Row */}
+        {/* Action Row - Separate Queue and Watched Buttons */}
         <div style={{
           display: 'flex',
-          gap: '0.5rem',
-          paddingTop: '0.75rem',
-          borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+          gap: '0.4rem',
+          paddingTop: '0.65rem',
+          borderTop: '1px solid var(--border-subtle)',
         }}>
+          {/* Add to Queue Button */}
           <button
-            onClick={handleWatchlistClick}
+            onClick={handleQueueClick}
             style={{
               flex: 1,
-              backgroundColor: isInWatchlist ? 'rgba(255, 215, 0, 0.15)' : 'rgba(229, 9, 20, 0.12)',
-              border: isInWatchlist ? '1px solid var(--cinema-gold)' : '1px solid rgba(229, 9, 20, 0.3)',
-              color: isInWatchlist ? 'var(--cinema-gold)' : '#FFFFFF',
-              padding: '0.45rem 0.6rem',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.75rem',
-              fontWeight: '600',
+              backgroundColor: isQueued ? 'rgba(200, 170, 118, 0.18)' : 'transparent',
+              border: isQueued ? '1px solid var(--accent-gold)' : '1px solid var(--border-subtle)',
+              color: isQueued ? 'var(--accent-gold)' : 'var(--text-primary)',
+              padding: '0.4rem 0.35rem',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.7rem',
+              fontWeight: '500',
+              fontFamily: 'var(--font-mono)',
+              whiteSpace: 'nowrap',
+              minWidth: 0,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '4px',
-              transition: 'all 0.2s',
+              gap: '3px',
+              transition: 'var(--transition-smooth)',
             }}
+            title={isQueued ? 'Remove from Queue' : 'Add to Queue'}
           >
-            {isInWatchlist ? (
-              <>
-                <Check size={14} />
-                <span>{watchlistStatus === 'watched' ? 'Watched' : 'In Watchlist'}</span>
-              </>
-            ) : (
-              <>
-                <Bookmark size={14} />
-                <span>+ Watchlist</span>
-              </>
-            )}
+            <Bookmark size={11} fill={isQueued ? 'var(--accent-gold)' : 'none'} style={{ flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap' }}>{isQueued ? 'In Queue' : 'Queue'}</span>
           </button>
 
+          {/* Mark Watched Button */}
           <button
-            onClick={() => onOpenDetails(movie)}
-            className="btn-secondary"
+            onClick={handleWatchedClick}
             style={{
-              padding: '0.45rem 0.6rem',
-              fontSize: '0.75rem',
+              flex: 1,
+              backgroundColor: isWatched ? 'rgba(120, 180, 140, 0.18)' : 'transparent',
+              border: isWatched ? '1px solid #739682' : '1px solid var(--border-subtle)',
+              color: isWatched ? '#a3d4b6' : 'var(--text-primary)',
+              padding: '0.4rem 0.35rem',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.7rem',
+              fontWeight: '500',
+              fontFamily: 'var(--font-mono)',
+              whiteSpace: 'nowrap',
+              minWidth: 0,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '3px',
+              transition: 'var(--transition-smooth)',
             }}
-            title="View Details"
+            title={isWatched ? 'Unmark Watched' : 'Mark as Watched'}
           >
-            <Info size={14} />
+            <Check size={11} strokeWidth={isWatched ? 3 : 2} style={{ flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap' }}>{isWatched ? 'Watched' : 'Watched'}</span>
           </button>
         </div>
       </div>
