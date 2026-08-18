@@ -1,22 +1,72 @@
-# Model files
-models/
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 
-# HuggingFace checkpoints
+# Distribution / Packaging
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Virtual Environments
+emovie/
+venv/
+.venv/
+env/
+ENV/
+
+# Environment Variables & Local Secrets
+.env
+.env.local
+.env.*.local
+
+# Node & Frontend dependencies
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database & Local Storage
+*.sqlite
+*.sqlite3
+*.db
+moofy.db
+chroma_db/
+
+# Model Checkpoints & Large Binaries
+models/distilbert_prod/*.safetensors
+models/distilbert_prod/*.bin
+models/distilbert_prod/results/
+tmp_trainer/
 checkpoint-*/
 
-# OS
-.DS_Store
-Thumbs.db
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Python
-__pycache__/
-*.pyc
-
-# Jupyter
+# Jupyter Notebooks
 .ipynb_checkpoints/
 
-# Virtual Environment
-.env
+# Operating System & Editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
 
-emovie/
-chroma_db/
+# Local workspace metadata
+.scratch/
+.agents/
+.claude/
+agent/
+skills/
+skills-lock.json
+AGENTS.md
+CONTEXT.md
+docs/
