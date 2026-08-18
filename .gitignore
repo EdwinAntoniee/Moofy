@@ -1,22 +1,47 @@
-# Model files
-models/
+# Frontend dependencies & build artifacts
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
 
-# HuggingFace checkpoints
+# Python & Environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+emovie/
+venv/
+.venv/
+.env
+
+# SQLite local DB
+moofy.db
+*.sqlite3
+
+# Large Model weights (exceeding GitHub 100MB limit - use Git LFS or HF Hub)
+models/distilbert_prod/*.safetensors
+models/distilbert_prod/*.bin
+models/distilbert_prod/results/
+tmp_trainer/
 checkpoint-*/
+
+# ChromaDB binary data (regenerated from dataset if needed)
+chroma_db/
+
+# Agent skills, lockfiles, and internal agent docs
+.agents/
+.claude/
+.scratch/
+agent/
+skills/
+skills-lock.json
+AGENTS.md
+CONTEXT.md
+docs/
+
+# Jupyter Checkpoints
+.ipynb_checkpoints/
 
 # OS
 .DS_Store
 Thumbs.db
-
-# Python
-__pycache__/
-*.pyc
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Virtual Environment
-.env
-
-emovie/
-chroma_db/
