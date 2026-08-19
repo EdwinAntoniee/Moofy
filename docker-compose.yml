@@ -1,0 +1,20 @@
+services:
+  moofy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: moofy-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - JWT_SECRET_KEY=moofy-production-secure-jwt-key-2026
+      - CORS_ORIGINS=*
+    volumes:
+      - moofy_data:/app/chroma_db
+      - moofy_db:/app/data_db
+
+volumes:
+  moofy_data:
+  moofy_db:

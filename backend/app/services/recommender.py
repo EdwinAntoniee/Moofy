@@ -32,14 +32,25 @@ class RecommenderService:
 
         # 1. Load DistilBERT Emotion Classifier
         print(f"[RecommenderService] Loading DistilBERT from {MODELS_DIR}")
-        self.tokenizer = DistilBertTokenizer.from_pretrained(str(MODELS_DIR))
-        self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(str(MODELS_DIR))
-        self.distilbert_model.to(self.device)
-        self.distilbert_model.eval()
+        try:
+            self.tokenizer = DistilBertTokenizer.from_pretrained(str(MODELS_DIR))
+            self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(str(MODELS_DIR))
+            self.distilbert_model.to(self.device)
+            self.distilbert_model.eval()
+        except Exception as e:
+            print(f"[Warning] Failed to load local model weights from {MODELS_DIR} ({e}). Falling back to distilbert-base-uncased.")
+            self.tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+            self.distilbert_model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=6)
+            self.distilbert_model.to(self.device)
+            self.distilbert_model.eval()
 
-        with open(MODELS_DIR / "label_encoder.pkl", "rb") as f:
-            self.label_encoder = pickle.load(f)
-        self.emotion_classes = list(self.label_encoder.classes_)
+        label_encoder_path = MODELS_DIR / "label_encoder.pkl"
+        if label_encoder_path.exists():
+            with open(label_encoder_path, "rb") as f:
+                self.label_encoder = pickle.load(f)
+            self.emotion_classes = list(self.label_encoder.classes_)
+        else:
+            self.emotion_classes = ["Anger", "Fear", "Joy", "Love", "Sadness", "Surprise"]
 
         # 2. Load Sentence-BERT
         print("[RecommenderService] Loading SentenceTransformer all-MiniLM-L6-v2")
@@ -49,31 +60,72 @@ class RecommenderService:
         print(f"[RecommenderService] Connecting to ChromaDB at {CHROMA_DB_DIR}")
         self.chroma_client = chromadb.PersistentClient(path=str(CHROMA_DB_DIR))
         self.collection = self.chroma_client.get_or_create_collection(name="movie_synopses")
-        print(f"[RecommenderService] ChromaDB collection count: {self.collection.count()}")
-
+        
         # 4. Load Enriched Metadata
         self.enriched_metadata: Dict[str, dict] = {}
         if ENRICHED_METADATA_FILE.exists():
             with open(ENRICHED_METADATA_FILE, "r", encoding="utf-8") as f:
                 self.enriched_metadata = json.load(f)
             print(f"[RecommenderService] Loaded {len(self.enriched_metadata)} enriched movie records.")
-        else:
-            if MOVIES_CSV_FILE.exists():
-                df = pd.read_csv(MOVIES_CSV_FILE)
-                for _, row in df.iterrows():
-                    m_id = str(row["movie_id"])
-                    self.enriched_metadata[m_id] = {
-                        "movie_id": int(row["movie_id"]),
-                        "title": row["title"],
-                        "overview": row["overview"],
-                        "poster_path": None,
-                        "backdrop_path": None,
-                        "release_date": "",
-                        "vote_average": 7.0,
-                        "vote_count": 100,
-                        "genres": [],
-                        "emotion_label": row["emotion_label"]
-                    }
+        elif MOVIES_CSV_FILE.exists():
+            df = pd.read_csv(MOVIES_CSV_FILE)
+            for _, row in df.iterrows():
+                m_id = str(row["movie_id"])
+                self.enriched_metadata[m_id] = {
+                    "movie_id": int(row["movie_id"]),
+                    "title": str(row["title"]),
+                    "overview": str(row.get("overview", "")),
+                    "poster_path": None,
+                    "backdrop_path": None,
+                    "release_date": "",
+                    "vote_average": 7.0,
+                    "vote_count": 100,
+                    "genres": [],
+                    "emotion_label": str(row.get("emotion_label", "Joy"))
+                }
+
+        # 5. Auto-seed ChromaDB if collection is empty (e.g. on fresh deployment)
+        if self.collection.count() == 0:
+            print("[RecommenderService] ChromaDB collection is empty. Auto-indexing TMDB movies...")
+            self._seed_chroma_collection()
+
+        print(f"[RecommenderService] ChromaDB collection ready. Item count: {self.collection.count()}")
+
+    def _seed_chroma_collection(self):
+        """Auto-embed synopses into ChromaDB if empty."""
+        try:
+            ids = []
+            documents = []
+            metadatas = []
+
+            for m_id, meta in self.enriched_metadata.items():
+                overview = meta.get("overview", "").strip()
+                if not overview:
+                    continue
+                ids.append(m_id)
+                documents.append(overview)
+                metadatas.append({
+                    "title": meta.get("title", ""),
+                    "emotion_label": meta.get("emotion_label", "Joy"),
+                    "vote_average": float(meta.get("vote_average", 7.0))
+                })
+
+            if documents:
+                print(f"[RecommenderService] Computing SBERT embeddings for {len(documents)} movies...")
+                embeddings = self.sbert_model.encode(documents, show_progress_bar=False, batch_size=64)
+                
+                # Insert in batches of 200
+                batch_size = 200
+                for i in range(0, len(ids), batch_size):
+                    self.collection.add(
+                        ids=ids[i:i+batch_size],
+                        embeddings=embeddings[i:i+batch_size].tolist(),
+                        documents=documents[i:i+batch_size],
+                        metadatas=metadatas[i:i+batch_size]
+                    )
+                print(f"[RecommenderService] Successfully indexed {len(ids)} movies into ChromaDB.")
+        except Exception as e:
+            print(f"[Error] Failed to auto-seed ChromaDB: {e}")
 
     @classmethod
     def get_instance(cls) -> "RecommenderService":
@@ -108,23 +160,21 @@ class RecommenderService:
             outputs = self.distilbert_model(**inputs)
             probs = torch.softmax(outputs.logits, dim=1).cpu().numpy()[0]
 
-        pred_idx = int(np.argmax(probs))
-        primary_emotion = self.emotion_classes[pred_idx]
+        emotion_dict = {
+            self.emotion_classes[i]: float(probs[i])
+            for i in range(len(self.emotion_classes))
+        }
 
-        emotion_dict = {}
-        breakdown = []
-        
-        # Sort emotions by probability descending
-        sorted_indices = np.argsort(probs)[::-1]
-        for idx in sorted_indices:
-            emo_name = self.emotion_classes[idx]
-            prob = float(probs[idx])
-            emotion_dict[emo_name] = prob
-            breakdown.append(EmotionScore(
-                emotion=emo_name,
-                score=round(prob, 4),
-                percentage=int(round(prob * 100))
-            ))
+        primary_emotion = self.emotion_classes[int(np.argmax(probs))]
+
+        breakdown = [
+            EmotionScore(
+                emotion=emo,
+                score=score,
+                percentage=int(round(score * 100))
+            )
+            for emo, score in sorted(emotion_dict.items(), key=lambda x: x[1], reverse=True)
+        ]
 
         return primary_emotion, emotion_dict, breakdown
 
@@ -135,90 +185,76 @@ class RecommenderService:
         top_k: int = 12,
         filter_emotion: Optional[str] = None
     ) -> RecommendResponse:
-        """
-        Execute high-quality hybrid recommendation:
-        1. Predict query emotion distribution via DistilBERT
-        2. Compute dense query embedding via Sentence-BERT
-        3. Query ChromaDB for candidate movies
-        4. Apply Adult & Quality filters (Rating >= 5.8, Votes >= 15, no explicit keywords)
-        5. Calculate hybrid score: Score = alpha * SemanticSim + (1 - alpha) * EmotionResonance
-        6. Return top-K MovieCards
-        """
+        """Hybrid Recommendation Pipeline."""
+        # 1. Predict Emotion Distribution
         primary_emotion, emotion_dict, breakdown = self.predict_emotion(prompt)
 
-        # 2. Encode query via Sentence-BERT
-        user_embedding = self.sbert_model.encode(prompt).tolist()
-
-        # 3. Retrieve Candidate Pool from ChromaDB
-        n_candidates = min(max(top_k * 6, 80), self.collection.count())
+        # 2. Semantic Search with ChromaDB
+        prompt_embedding = self.sbert_model.encode(prompt).tolist()
         
-        where_filter = None
-        if filter_emotion and filter_emotion in self.emotion_classes:
-            where_filter = {"emotion": filter_emotion}
+        # Query more candidates (e.g. 50) to allow quality and adult filtering
+        query_res = self.collection.query(
+            query_embeddings=[prompt_embedding],
+            n_results=min(60, max(self.collection.count(), 1)),
+            include=["documents", "metadatas", "distances"]
+        )
 
-        query_params = {
-            "query_embeddings": [user_embedding],
-            "n_results": n_candidates
-        }
-        if where_filter:
-            query_params["where"] = where_filter
+        candidate_ids = query_res["ids"][0] if query_res["ids"] else []
+        distances = query_res["distances"][0] if query_res["distances"] else []
 
-        query_results = self.collection.query(**query_params)
+        scored_candidates = []
 
-        candidate_ids = query_results["ids"][0]
-        candidate_docs = query_results["documents"][0]
-        candidate_metas = query_results["metadatas"][0]
-        candidate_distances = query_results["distances"][0]
+        for m_id, dist in zip(candidate_ids, distances):
+            meta = self.enriched_metadata.get(str(m_id), {})
+            movie_title = meta.get("title", f"Movie #{m_id}")
+            overview = meta.get("overview", "")
+            vote_avg = float(meta.get("vote_average", 7.0))
+            vote_count = int(meta.get("vote_count", 100))
+            movie_emotion = meta.get("emotion_label", primary_emotion)
 
-        scored_movies: List[MovieCard] = []
-
-        for i, (m_id_str, doc, meta, dist) in enumerate(zip(candidate_ids, candidate_docs, candidate_metas, candidate_distances)):
-            meta_enriched = self.enriched_metadata.get(str(m_id_str), {})
-            title = meta_enriched.get("title", meta.get("title", "Untitled"))
-            overview = meta_enriched.get("overview", doc)
-            vote_average = float(meta_enriched.get("vote_average", 7.0))
-            vote_count = int(meta_enriched.get("vote_count", 100))
-
-            # Quality and Adult Safety Filter
-            if not self.is_safe_and_high_quality(title, overview, vote_average, vote_count):
+            # Strict Adult / Low-Quality Filter
+            if not self.is_safe_and_high_quality(movie_title, overview, vote_avg, vote_count):
                 continue
 
-            semantic_sim = max(0.0, min(1.0, 1.0 - (dist / 2.0)))
-            movie_emotion = meta.get("emotion", "Joy")
-            emotion_resonance = emotion_dict.get(movie_emotion, 0.0)
-            hybrid_score = (alpha * semantic_sim) + ((1.0 - alpha) * emotion_resonance)
+            if filter_emotion and filter_emotion != "ALL" and movie_emotion != filter_emotion:
+                continue
 
-            poster_path = meta_enriched.get("poster_path")
-            backdrop_path = meta_enriched.get("backdrop_path")
-            release_date = meta_enriched.get("release_date", "")
-            genres = meta_enriched.get("genres", [])
+            # Semantic similarity score
+            sim_score = max(0.0, 1.0 - (dist / 2.0))
+
+            # Emotion resonance score
+            emo_score = emotion_dict.get(movie_emotion, 0.0)
+
+            # Adaptive Hybrid Score Formula
+            hybrid_score = (alpha * sim_score) + ((1.0 - alpha) * emo_score)
 
             card = MovieCard(
-                movie_id=int(m_id_str),
-                title=title,
+                movie_id=int(m_id),
+                title=movie_title,
                 overview=overview,
-                poster_path=poster_path,
-                backdrop_path=backdrop_path,
-                release_date=release_date,
-                vote_average=vote_average,
+                poster_path=meta.get("poster_path"),
+                backdrop_path=meta.get("backdrop_path"),
+                release_date=meta.get("release_date", ""),
+                vote_average=vote_avg,
                 vote_count=vote_count,
-                genres=genres,
+                genres=meta.get("genres", []),
                 emotion_label=movie_emotion,
-                semantic_similarity=round(semantic_sim, 4),
-                emotion_resonance=round(emotion_resonance, 4),
-                hybrid_score=round(hybrid_score, 4)
+                semantic_similarity=round(float(sim_score), 4),
+                emotion_resonance=round(float(emo_score), 4),
+                hybrid_score=round(float(hybrid_score), 4)
             )
-            scored_movies.append(card)
 
-        # Sort initially by hybrid score
-        scored_movies.sort(key=lambda x: x.hybrid_score, reverse=True)
-        top_movies = scored_movies[:top_k]
+            scored_candidates.append(card)
+
+        # Sort candidate movies by hybrid score descending
+        scored_candidates.sort(key=lambda x: x.hybrid_score, reverse=True)
+        final_movies = scored_candidates[:top_k]
 
         return RecommendResponse(
             prompt=prompt,
             primary_emotion=primary_emotion,
             emotion_breakdown=breakdown,
             alpha=alpha,
-            total_results=len(top_movies),
-            movies=top_movies
+            total_results=len(final_movies),
+            movies=final_movies
         )
