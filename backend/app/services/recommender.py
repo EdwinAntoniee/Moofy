@@ -37,34 +37,27 @@ class RecommenderService:
         self.device = torch.device("cpu")
         print(f"[RecommenderService] Initializing on device: {self.device}")
 
-        # 1. Load DistilBERT Emotion Classifier with memory optimizations
-        print(f"[RecommenderService] Loading DistilBERT from {MODELS_DIR}")
-        try:
-            self.tokenizer = DistilBertTokenizer.from_pretrained(str(MODELS_DIR))
-            self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(
-                str(MODELS_DIR),
-                low_cpu_mem_usage=True
-            )
-            self.distilbert_model.to(self.device)
-            self.distilbert_model.eval()
-        except Exception as e:
-            print(f"[Warning] Failed to load local model weights from {MODELS_DIR} ({e}). Falling back to distilbert-base-uncased.")
-            self.tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
-            self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(
-                "distilbert-base-uncased",
-                num_labels=6,
-                low_cpu_mem_usage=True
-            )
-            self.distilbert_model.to(self.device)
-            self.distilbert_model.eval()
+        # 1. Load DistilBERT Emotion Classifier if weights exist on disk
+        safetensors_path = MODELS_DIR / "model.safetensors"
+        bin_path = MODELS_DIR / "pytorch_model.bin"
+        
+        self.distilbert_model = None
+        self.tokenizer = None
+        self.emotion_classes = ["Anger", "Fear", "Joy", "Love", "Sadness", "Surprise"]
 
-        label_encoder_path = MODELS_DIR / "label_encoder.pkl"
-        if label_encoder_path.exists():
-            with open(label_encoder_path, "rb") as f:
-                self.label_encoder = pickle.load(f)
-            self.emotion_classes = list(self.label_encoder.classes_)
+        if safetensors_path.exists() or bin_path.exists():
+            try:
+                print(f"[RecommenderService] Loading DistilBERT weights from {MODELS_DIR}")
+                self.tokenizer = DistilBertTokenizer.from_pretrained(str(MODELS_DIR))
+                self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(str(MODELS_DIR))
+                self.distilbert_model.to(self.device)
+                self.distilbert_model.eval()
+                print("[RecommenderService] DistilBERT model loaded successfully.")
+            except Exception as e:
+                print(f"[Warning] Failed to load local DistilBERT weights ({e}). Using semantic emotion engine.")
+                self.distilbert_model = None
         else:
-            self.emotion_classes = ["Anger", "Fear", "Joy", "Love", "Sadness", "Surprise"]
+            print("[RecommenderService] Model weights not packaged in cloud image. Using high-precision SBERT semantic emotion engine.")
 
         gc.collect()
 
