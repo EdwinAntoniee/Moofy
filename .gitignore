@@ -45,6 +45,7 @@ models/distilbert_prod/*.bin
 models/distilbert_prod/results/
 tmp_trainer/
 checkpoint-*/
+dataset_raw/
 
 # Testing & Coverage
 .pytest_cache/
