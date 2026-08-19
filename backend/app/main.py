@@ -10,18 +10,13 @@ import uvicorn
 from app.core.config import settings, BASE_DIR
 from app.db.session import engine, Base
 from app.api import auth, recommend, history, watchlist
-from app.services.recommender import RecommenderService
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 1. Initialize Database Tables
-    print("[Startup] Creating database tables...")
+    print("[Startup] Initializing database tables...")
     Base.metadata.create_all(bind=engine)
-    
-    # 2. Warm up Recommender Service (Loads DistilBERT & ChromaDB)
-    print("[Startup] Warming up RecommenderService...")
-    RecommenderService.get_instance()
-    print("[Startup] Moofy Backend is ready to serve!")
+    print("[Startup] Moofy Backend is ready and listening on port!")
     yield
     print("[Shutdown] Cleaning up resources...")
 
@@ -68,4 +63,4 @@ if frontend_dist.exists():
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
-    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)

@@ -1,3 +1,4 @@
+import gc
 import json
 import pickle
 import re
@@ -23,24 +24,37 @@ ADULT_KEYWORDS = [
 ]
 ADULT_REGEX = re.compile('|'.join(ADULT_KEYWORDS), re.IGNORECASE)
 
+# Restrict PyTorch background threads to conserve memory in constrained environments
+try:
+    torch.set_num_threads(1)
+except Exception:
+    pass
+
 class RecommenderService:
     _instance = None
 
     def __init__(self):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu")
         print(f"[RecommenderService] Initializing on device: {self.device}")
 
-        # 1. Load DistilBERT Emotion Classifier
+        # 1. Load DistilBERT Emotion Classifier with memory optimizations
         print(f"[RecommenderService] Loading DistilBERT from {MODELS_DIR}")
         try:
             self.tokenizer = DistilBertTokenizer.from_pretrained(str(MODELS_DIR))
-            self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(str(MODELS_DIR))
+            self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(
+                str(MODELS_DIR),
+                low_cpu_mem_usage=True
+            )
             self.distilbert_model.to(self.device)
             self.distilbert_model.eval()
         except Exception as e:
             print(f"[Warning] Failed to load local model weights from {MODELS_DIR} ({e}). Falling back to distilbert-base-uncased.")
             self.tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
-            self.distilbert_model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=6)
+            self.distilbert_model = DistilBertForSequenceClassification.from_pretrained(
+                "distilbert-base-uncased",
+                num_labels=6,
+                low_cpu_mem_usage=True
+            )
             self.distilbert_model.to(self.device)
             self.distilbert_model.eval()
 
@@ -52,9 +66,12 @@ class RecommenderService:
         else:
             self.emotion_classes = ["Anger", "Fear", "Joy", "Love", "Sadness", "Surprise"]
 
-        # 2. Load Sentence-BERT
+        gc.collect()
+
+        # 2. Load Sentence-BERT on CPU
         print("[RecommenderService] Loading SentenceTransformer all-MiniLM-L6-v2")
-        self.sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.sbert_model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
+        gc.collect()
 
         # 3. Connect to ChromaDB
         print(f"[RecommenderService] Connecting to ChromaDB at {CHROMA_DB_DIR}")
@@ -90,6 +107,7 @@ class RecommenderService:
             self._seed_chroma_collection()
 
         print(f"[RecommenderService] ChromaDB collection ready. Item count: {self.collection.count()}")
+        gc.collect()
 
     def _seed_chroma_collection(self):
         """Auto-embed synopses into ChromaDB if empty."""
@@ -112,7 +130,7 @@ class RecommenderService:
 
             if documents:
                 print(f"[RecommenderService] Computing SBERT embeddings for {len(documents)} movies...")
-                embeddings = self.sbert_model.encode(documents, show_progress_bar=False, batch_size=64)
+                embeddings = self.sbert_model.encode(documents, show_progress_bar=False, batch_size=32)
                 
                 # Insert in batches of 200
                 batch_size = 200
@@ -124,6 +142,7 @@ class RecommenderService:
                         metadatas=metadatas[i:i+batch_size]
                     )
                 print(f"[RecommenderService] Successfully indexed {len(ids)} movies into ChromaDB.")
+                gc.collect()
         except Exception as e:
             print(f"[Error] Failed to auto-seed ChromaDB: {e}")
 
@@ -156,7 +175,7 @@ class RecommenderService:
             max_length=128
         ).to(self.device)
 
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = self.distilbert_model(**inputs)
             probs = torch.softmax(outputs.logits, dim=1).cpu().numpy()[0]
 
@@ -192,7 +211,7 @@ class RecommenderService:
         # 2. Semantic Search with ChromaDB
         prompt_embedding = self.sbert_model.encode(prompt).tolist()
         
-        # Query more candidates (e.g. 50) to allow quality and adult filtering
+        # Query candidates from ChromaDB
         query_res = self.collection.query(
             query_embeddings=[prompt_embedding],
             n_results=min(60, max(self.collection.count(), 1)),
