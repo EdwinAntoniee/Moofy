@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 import json
@@ -19,13 +19,21 @@ def get_recommendations(
     current_user: Optional[User] = Depends(get_current_user_optional),
     db: Session = Depends(get_db)
 ):
-    recommender = RecommenderService.get_instance()
-    response = recommender.recommend(
-        prompt=req.prompt,
-        alpha=req.alpha,
-        top_k=req.top_k,
-        filter_emotion=req.filter_emotion
-    )
+    try:
+        recommender = RecommenderService.get_instance()
+        response = recommender.recommend(
+            prompt=req.prompt,
+            alpha=req.alpha,
+            top_k=req.top_k,
+            filter_emotion=req.filter_emotion
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Recommendation pipeline error: {str(e)}"
+        )
 
     # If the user is logged in, automatically save or update this discovery in their Emotion History
     if current_user is not None:

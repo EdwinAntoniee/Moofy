@@ -211,15 +211,26 @@ class RecommenderService:
         # 2. Semantic Search with ChromaDB
         prompt_embedding = self.sbert_model.encode(prompt).tolist()
         
-        # Query candidates from ChromaDB
-        query_res = self.collection.query(
-            query_embeddings=[prompt_embedding],
-            n_results=min(60, max(self.collection.count(), 1)),
-            include=["documents", "metadatas", "distances"]
-        )
+        candidate_ids = []
+        distances = []
 
-        candidate_ids = query_res["ids"][0] if query_res["ids"] else []
-        distances = query_res["distances"][0] if query_res["distances"] else []
+        if self.collection.count() > 0:
+            try:
+                n_res = min(60, self.collection.count())
+                query_res = self.collection.query(
+                    query_embeddings=[prompt_embedding],
+                    n_results=n_res,
+                    include=["documents", "metadatas", "distances"]
+                )
+                candidate_ids = query_res["ids"][0] if query_res.get("ids") else []
+                distances = query_res["distances"][0] if query_res.get("distances") else []
+            except Exception as e:
+                print(f"[Warning] ChromaDB query failed: {e}")
+
+        # Fallback if ChromaDB empty or failed
+        if not candidate_ids and self.enriched_metadata:
+            candidate_ids = list(self.enriched_metadata.keys())[:60]
+            distances = [1.0] * len(candidate_ids)
 
         scored_candidates = []
 
