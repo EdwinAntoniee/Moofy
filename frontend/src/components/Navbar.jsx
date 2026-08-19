@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, History, Bookmark, LogIn, LogOut, Compass } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import logoImg from '../assets/logo.png';
 
 export const Navbar = ({ activeTab, setActiveTab, onOpenAuth }) => {
   const { user, isGuest, logout } = useAuth();
@@ -38,7 +39,7 @@ export const Navbar = ({ activeTab, setActiveTab, onOpenAuth }) => {
         }}
       >
         <img
-          src="/logo.png"
+          src={logoImg}
           alt="Moofy Logo"
           style={{
             height: '26px',

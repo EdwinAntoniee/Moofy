@@ -107,11 +107,33 @@ export const AuthModal = ({ isOpen, onClose, onSuccess }) => {
             marginBottom: '1.25rem',
             fontSize: '0.8rem',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             gap: '0.5rem',
           }}>
-            <AlertCircle size={14} />
-            <span>{error}</span>
+            <AlertCircle size={14} style={{ marginTop: '2px', flexShrink: 0 }} />
+            <div>
+              <span>{error}</span>
+              {!isRegister && error.toLowerCase().includes('sign up') && (
+                <button
+                  type="button"
+                  onClick={() => { setIsRegister(true); setError(''); }}
+                  style={{
+                    display: 'block',
+                    marginTop: '0.35rem',
+                    background: 'none',
+                    border: 'none',
+                    color: '#FDE047',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    padding: 0,
+                    fontSize: '0.8rem',
+                  }}
+                >
+                  Create an account now &rarr;
+                </button>
+              )}
+            </div>
           </div>
         )}
 
