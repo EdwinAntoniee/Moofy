@@ -166,25 +166,46 @@ class RecommenderService:
         return True
 
     def predict_emotion(self, text: str) -> Tuple[str, Dict[str, float], List[EmotionScore]]:
-        """Predict emotion probabilities for an emotion prompt."""
-        inputs = self.tokenizer(
-            text,
-            return_tensors="pt",
-            truncation=True,
-            padding=True,
-            max_length=128
-        ).to(self.device)
+        """Predict emotion probabilities for an emotion prompt with robust multi-layer fallback."""
+        try:
+            inputs = self.tokenizer(
+                text,
+                return_tensors="pt",
+                truncation=True,
+                padding=True,
+                max_length=128
+            ).to(self.device)
 
-        with torch.inference_mode():
-            outputs = self.distilbert_model(**inputs)
-            probs = torch.softmax(outputs.logits, dim=1).cpu().numpy()[0]
+            with torch.inference_mode():
+                outputs = self.distilbert_model(**inputs)
+                probs = torch.softmax(outputs.logits, dim=1).cpu().numpy()[0]
 
-        emotion_dict = {
-            self.emotion_classes[i]: float(probs[i])
-            for i in range(len(self.emotion_classes))
-        }
-
-        primary_emotion = self.emotion_classes[int(np.argmax(probs))]
+            emotion_dict = {
+                self.emotion_classes[i]: float(probs[i])
+                for i in range(len(self.emotion_classes))
+            }
+            primary_emotion = self.emotion_classes[int(np.argmax(probs))]
+        except Exception as e:
+            print(f"[Warning] DistilBERT inference failed ({e}). Using semantic emotion anchor mapping.")
+            anchors = [
+                "anger rage fury aggressive violent mad revenge wrath hate hostility",
+                "fear terror horror scary suspense anxiety dread panic spooky thriller danger nightmare",
+                "joy happiness cheerful uplifting hilarious fun comedy adventure exciting celebration",
+                "love romance romantic affection passion sweet heart couple intimacy crush tender",
+                "sadness crying grief heartbreak depression sorrow tearful lonely mourn tragic despair",
+                "surprise shocked unexpected plot twist mystery mind blowing astonishing revelation discovery"
+            ]
+            anchor_embs = self.sbert_model.encode(anchors)
+            query_emb = self.sbert_model.encode([text])
+            from sklearn.metrics.pairwise import cosine_similarity
+            sims = cosine_similarity(query_emb, anchor_embs)[0]
+            exp_sims = np.exp(sims * 5)
+            probs = exp_sims / np.sum(exp_sims)
+            emotion_dict = {
+                self.emotion_classes[i]: float(probs[i])
+                for i in range(len(self.emotion_classes))
+            }
+            primary_emotion = self.emotion_classes[int(np.argmax(probs))]
 
         breakdown = [
             EmotionScore(
