@@ -28,7 +28,6 @@ The platform blends:
 1. **Fine-tuned DistilBERT Emotion Classifier** predicting a 6-class probability distribution across *Joy, Sadness, Anger, Fear, Love, and Surprise*.
 2. **Sentence-BERT (`all-MiniLM-L6-v2`) + ChromaDB Vector Engine** performing high-dimensional semantic search over the TMDB movie corpus.
 3. **Adaptive Hybrid Scoring Engine** allowing users to dynamically balance emotional resonance against plot semantics.
-4. **Editorial Aesthetic** inspired by classic 35mm film archives and modern editorial typography.
 
 ---
 
@@ -36,12 +35,10 @@ The platform blends:
 
 * **🎭 Natural Language Emotion Detection**: Express sentiments freely in plain English. The fine-tuned transformer predicts the primary mood and probability breakdown across 6 core emotions.
 * **🎛️ Dynamic Recommendation Focus**: Real-time slider adjusting the synthesis between **Mood Focus** (emotional resonance) and **Plot Focus** (semantic plot alignment).
-* **📼 35mm Film Tape Visualizer**: Ambient dual-tape 35mm film background streaming 56 high-resolution cinematic backdrops.
 * **🛡️ Content Safety & Quality Filtering**: Automatic filtering rejecting adult/erotic content and unvetted placeholder releases (enforcing minimum quality rating and vote thresholds).
 * **👤 Guest vs. Authenticated User Flows**:
   * **Guest Mode**: Instant zero-friction emotion search and film exploration.
-  * **Authenticated Mode**: Automatically archived **Moods History** timeline, deduplicated re-explorations, and personal **Watchlist & Queue** manager (with distinct *Queue*, *Watched*, and *Unwatch* states).
-* **📱 Fully Responsive**: Custom CSS grid and layout optimized across mobile phones, tablets, and wide monitors.
+  * **Authenticated Mode**: Automatically archived **History** timeline and personal **Watchlist & Queue** manager.
 
 ---
 
@@ -138,24 +135,6 @@ Moofy includes a multi-stage production Docker configuration that compiles the R
 docker compose up --build
 ```
 Access the application at `http://localhost:8000`.
-
----
-
-## 🌐 Cloud Deployment Options
-
-### Option A: Full-Stack Docker Container (Render, Railway, Fly.io, Cloud VPS)
-* Deploy the included `Dockerfile` directly.
-* Set environment variable: `PORT=8000`, `JWT_SECRET_KEY=<your-secret-key>`.
-
-### Option B: Decoupled Architecture (Vercel + Cloud Backend)
-1. **Frontend (Vercel)**:
-   * Set Root Directory to `frontend`.
-   * Add Environment Variable: `VITE_API_URL=https://your-backend-domain.com/api`.
-   * Framework Preset: `Vite`.
-2. **Backend (Render / Railway / Hugging Face Spaces)**:
-   * Build command: `pip install -r requirements.txt`.
-   * Start command: `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`.
-   * Set `CORS_ORIGINS=https://your-frontend.vercel.app`.
 
 ---
 
