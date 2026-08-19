@@ -1,3 +1,15 @@
+---
+title: Moofy Backend API
+emoji: 🎬
+colorFrom: yellow
+colorTo: gray
+sdk: gradio
+sdk_version: 4.44.0
+app_file: app.py
+pinned: false
+license: mit
+---
+
 # Moofy — Emotion-Aware Cinema Recommendation Platform
 
 <p align="center">
