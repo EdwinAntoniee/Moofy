@@ -1,5 +1,6 @@
-*.pkl binary
+*.pkl filter=lfs diff=lfs merge=lfs -text
 *.keras binary
 *.h5 binary
-*.bin binary
-*.safetensors binary
+*.bin filter=lfs diff=lfs merge=lfs -text
+*.safetensors filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
