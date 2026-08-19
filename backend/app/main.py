@@ -49,6 +49,12 @@ app.include_router(watchlist.router, prefix=settings.API_V1_STR)
 def health_check():
     return {"status": "healthy", "service": "Moofy API", "version": settings.VERSION}
 
+@app.get("/.streamlit/secrets.toml")
+@app.get("/_stcore/health")
+@app.get("/_stcore/host-config")
+def streamlit_health_check():
+    return {"status": "ok"}
+
 # Optional: Serve production frontend build if dist folder exists
 frontend_dist = BASE_DIR / "frontend" / "dist"
 if frontend_dist.exists():
