@@ -36,7 +36,6 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
   const handleQueueClick = async (item, e) => {
     e.stopPropagation();
     if (item.status === 'plan_to_watch') {
-      // Unqueue / Remove from watchlist
       try {
         await api.removeFromWatchlist(item.movie_id);
         setWatchlist((prev) => prev.filter((m) => m.movie_id !== item.movie_id));
@@ -45,7 +44,6 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
         alert('Failed to unqueue film');
       }
     } else {
-      // Move from watched -> plan_to_watch
       try {
         await api.updateWatchlistStatus(item.movie_id, 'plan_to_watch');
         setWatchlist((prev) =>
@@ -62,7 +60,6 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
   const handleWatchedClick = async (item, e) => {
     e.stopPropagation();
     if (item.status === 'watched') {
-      // Unmark watched / Remove from watchlist
       try {
         await api.removeFromWatchlist(item.movie_id);
         setWatchlist((prev) => prev.filter((m) => m.movie_id !== item.movie_id));
@@ -71,7 +68,6 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
         alert('Failed to unmark watched');
       }
     } else {
-      // Move from plan_to_watch -> watched
       try {
         await api.updateWatchlistStatus(item.movie_id, 'watched');
         setWatchlist((prev) =>
@@ -105,13 +101,13 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
   if (loading) {
     return (
       <div style={{ maxWidth: '1000px', margin: '4rem auto', textAlign: 'center', color: 'var(--text-muted)' }}>
-        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>Loading archive...</p>
+        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }}>Loading archive...</p>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '2.5rem auto', padding: '0 1rem' }}>
+    <div style={{ maxWidth: '1100px', margin: '2rem auto', padding: '0 clamp(0.75rem, 2.5vw, 1rem)' }}>
       {/* Header */}
       <div style={{
         display: 'flex',
@@ -119,12 +115,12 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
         alignItems: 'baseline',
         flexWrap: 'wrap',
         gap: '0.75rem',
-        marginBottom: '1.5rem',
-        paddingBottom: '0.85rem',
+        marginBottom: '1.25rem',
+        paddingBottom: '0.75rem',
         borderBottom: '1px solid var(--border-subtle)',
       }}>
         <div>
-          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.2rem, 3vw, 1.6rem)', fontWeight: '600', fontStyle: 'italic', color: 'var(--text-primary)' }}>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.15rem, 3vw, 1.55rem)', fontWeight: '600', fontStyle: 'italic', color: 'var(--text-primary)' }}>
             Personal Watchlist
           </h2>
         </div>
@@ -137,11 +133,11 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
               background: statusFilter === 'all' ? 'var(--bg-surface-elevated)' : 'transparent',
               color: statusFilter === 'all' ? 'var(--text-primary)' : 'var(--text-muted)',
               border: statusFilter === 'all' ? '1px solid var(--border-subtle)' : 'none',
-              padding: '0.35rem 0.65rem',
+              padding: '0.3rem 0.6rem',
               borderRadius: 'var(--radius-xs)',
-              fontSize: '0.72rem',
+              fontSize: 'clamp(0.66rem, 1.8vw, 0.72rem)',
               fontWeight: '500',
-              fontFamily: 'ui-monospace, SFMono-Regular, monospace',
+              fontFamily: 'var(--font-mono)',
               cursor: 'pointer',
             }}
           >
@@ -153,11 +149,11 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
               background: statusFilter === 'plan_to_watch' ? 'var(--bg-surface-elevated)' : 'transparent',
               color: statusFilter === 'plan_to_watch' ? 'var(--text-primary)' : 'var(--text-muted)',
               border: statusFilter === 'plan_to_watch' ? '1px solid var(--border-subtle)' : 'none',
-              padding: '0.35rem 0.65rem',
+              padding: '0.3rem 0.6rem',
               borderRadius: 'var(--radius-xs)',
-              fontSize: '0.72rem',
+              fontSize: 'clamp(0.66rem, 1.8vw, 0.72rem)',
               fontWeight: '500',
-              fontFamily: 'ui-monospace, SFMono-Regular, monospace',
+              fontFamily: 'var(--font-mono)',
               cursor: 'pointer',
             }}
           >
@@ -169,11 +165,11 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
               background: statusFilter === 'watched' ? 'var(--bg-surface-elevated)' : 'transparent',
               color: statusFilter === 'watched' ? 'var(--text-primary)' : 'var(--text-muted)',
               border: statusFilter === 'watched' ? '1px solid var(--border-subtle)' : 'none',
-              padding: '0.35rem 0.65rem',
+              padding: '0.3rem 0.6rem',
               borderRadius: 'var(--radius-xs)',
-              fontSize: '0.72rem',
+              fontSize: 'clamp(0.66rem, 1.8vw, 0.72rem)',
               fontWeight: '500',
-              fontFamily: 'ui-monospace, SFMono-Regular, monospace',
+              fontFamily: 'var(--font-mono)',
               cursor: 'pointer',
             }}
           >
@@ -184,11 +180,11 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div className="editorial-card" style={{ padding: '3.5rem 2rem', textAlign: 'center' }}>
-          <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+        <div className="editorial-card" style={{ padding: '3rem 1.5rem', textAlign: 'center' }}>
+          <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>
             No films saved in this view.
           </p>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: '380px', margin: '0 auto' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', maxWidth: '380px', margin: '0 auto' }}>
             Explore films through Discovery and add them to your Queue or mark them as Watched.
           </p>
         </div>
@@ -197,7 +193,6 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
           {filtered.map((item) => {
             const posterUrl = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null;
             const releaseYear = item.release_date ? item.release_date.substring(0, 4) : '';
-            const emoColor = EMOTION_COLORS[item.emotion_label] || 'var(--accent-gold)';
             const isQueued = item.status === 'plan_to_watch';
             const isWatched = item.status === 'watched';
 
@@ -237,66 +232,99 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
                   )}
 
                   {/* Status Badge */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '10px',
-                    left: '10px',
-                    backgroundColor: 'rgba(12, 12, 14, 0.85)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid var(--border-subtle)',
-                    padding: '2px 7px',
-                    borderRadius: 'var(--radius-xs)',
-                    fontSize: '0.7rem',
-                    fontWeight: '600',
-                    color: isWatched ? 'var(--accent-gold)' : 'var(--text-primary)',
-                    fontFamily: 'var(--font-mono)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}>
-                    {isWatched ? <Check size={11} /> : <Star size={11} fill="var(--accent-gold)" color="var(--accent-gold)" />}
+                  <div 
+                    className="movie-card-badge"
+                    style={{
+                      position: 'absolute',
+                      top: '8px',
+                      left: '8px',
+                      backgroundColor: 'rgba(12, 12, 14, 0.85)',
+                      backdropFilter: 'blur(8px)',
+                      border: '1px solid var(--border-subtle)',
+                      padding: '2px 6px',
+                      borderRadius: 'var(--radius-xs)',
+                      fontSize: '0.68rem',
+                      fontWeight: '600',
+                      color: isWatched ? 'var(--accent-gold)' : 'var(--text-primary)',
+                      fontFamily: 'var(--font-mono)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                    }}
+                  >
+                    {isWatched ? <Check size={10} /> : <Star size={10} fill="var(--accent-gold)" color="var(--accent-gold)" />}
                     <span>{isWatched ? 'WATCHED' : item.vote_average ? item.vote_average.toFixed(1) : '7.0'}</span>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div style={{ padding: '1rem', display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'space-between', gap: '0.75rem' }}>
+                <div 
+                  className="movie-card-body"
+                  style={{
+                    padding: '0.9rem 0.85rem',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    flex: 1,
+                    justifyContent: 'space-between',
+                    gap: '0.65rem',
+                  }}
+                >
                   <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.35rem' }}>
-                      <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-primary)', lineHeight: '1.3' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.35rem', marginBottom: '0.3rem' }}>
+                      <h4 
+                        className="movie-card-title"
+                        style={{
+                          fontFamily: 'var(--font-serif)',
+                          fontSize: '0.96rem',
+                          fontWeight: '600',
+                          color: 'var(--text-primary)',
+                          lineHeight: '1.3',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          wordBreak: 'break-word',
+                        }}
+                      >
                         {item.title}
                       </h4>
                       {releaseYear && (
-                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{releaseYear}</span>
+                        <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+                          {releaseYear}
+                        </span>
                       )}
                     </div>
 
-                    <p style={{
-                      fontSize: '0.78rem',
-                      color: 'var(--text-secondary)',
-                      lineHeight: '1.4',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}>
+                    <p 
+                      className="movie-card-synopsis"
+                      style={{
+                        fontSize: '0.74rem',
+                        color: 'var(--text-secondary)',
+                        lineHeight: '1.45',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
                       {item.overview || 'No synopsis recorded.'}
                     </p>
                   </div>
 
-                  {/* Actions - Separate Queue and Watched Buttons */}
-                  <div style={{ display: 'flex', gap: '0.4rem', paddingTop: '0.65rem', borderTop: '1px solid var(--border-subtle)' }}>
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: '0.35rem', paddingTop: '0.55rem', borderTop: '1px solid var(--border-subtle)' }}>
                     {/* Queue Button */}
                     <button
                       onClick={(e) => handleQueueClick(item, e)}
+                      className="movie-card-action-btn"
                       style={{
                         flex: 1,
                         backgroundColor: isQueued ? 'rgba(200, 170, 118, 0.18)' : 'transparent',
                         border: isQueued ? '1px solid var(--accent-gold)' : '1px solid var(--border-subtle)',
                         color: isQueued ? 'var(--accent-gold)' : 'var(--text-primary)',
-                        padding: '0.35rem 0.35rem',
+                        padding: '0.38rem 0.25rem',
                         borderRadius: 'var(--radius-xs)',
-                        fontSize: '0.7rem',
+                        fontSize: '0.68rem',
                         fontFamily: 'var(--font-mono)',
                         whiteSpace: 'nowrap',
                         minWidth: 0,
@@ -309,21 +337,22 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
                       }}
                       title={isQueued ? 'Click to unqueue film' : 'Move to Queue'}
                     >
-                      <Bookmark size={11} fill={isQueued ? 'var(--accent-gold)' : 'none'} style={{ flexShrink: 0 }} />
-                      <span style={{ whiteSpace: 'nowrap' }}>{isQueued ? 'In Queue' : 'Queue'}</span>
+                      <Bookmark size={10} fill={isQueued ? 'var(--accent-gold)' : 'none'} style={{ flexShrink: 0 }} />
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{isQueued ? 'In Queue' : 'Queue'}</span>
                     </button>
 
                     {/* Watched Button */}
                     <button
                       onClick={(e) => handleWatchedClick(item, e)}
+                      className="movie-card-action-btn"
                       style={{
                         flex: 1,
                         backgroundColor: isWatched ? 'rgba(120, 180, 140, 0.18)' : 'transparent',
                         border: isWatched ? '1px solid #739682' : '1px solid var(--border-subtle)',
                         color: isWatched ? '#a3d4b6' : 'var(--text-primary)',
-                        padding: '0.35rem 0.35rem',
+                        padding: '0.38rem 0.25rem',
                         borderRadius: 'var(--radius-xs)',
-                        fontSize: '0.7rem',
+                        fontSize: '0.68rem',
                         fontFamily: 'var(--font-mono)',
                         whiteSpace: 'nowrap',
                         minWidth: 0,
@@ -336,27 +365,28 @@ export const WatchlistView = ({ onOpenDetails, onWatchlistUpdated }) => {
                       }}
                       title={isWatched ? 'Click to unmark watched' : 'Mark as Watched'}
                     >
-                      <Check size={11} strokeWidth={isWatched ? 3 : 2} style={{ flexShrink: 0 }} />
-                      <span style={{ whiteSpace: 'nowrap' }}>{isWatched ? 'Watched' : 'Watched'}</span>
+                      <Check size={10} strokeWidth={isWatched ? 3 : 2} style={{ flexShrink: 0 }} />
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{isWatched ? 'Watched' : 'Watched'}</span>
                     </button>
 
-                    {/* Remove from Vault Button */}
+                    {/* Remove Button */}
                     <button
                       onClick={(e) => handleRemove(item.movie_id, e)}
                       style={{
                         background: 'transparent',
                         border: '1px solid var(--border-subtle)',
                         color: 'var(--text-muted)',
-                        padding: '0.35rem 0.55rem',
+                        padding: '0.38rem 0.45rem',
                         borderRadius: 'var(--radius-xs)',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
+                        flexShrink: 0,
                       }}
                       title="Remove from watchlist"
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={12} />
                     </button>
                   </div>
                 </div>

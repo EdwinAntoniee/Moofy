@@ -84,12 +84,12 @@ export const MovieCard = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '1.5rem',
+            padding: '1rem',
             textAlign: 'center',
             backgroundColor: '#151518',
             color: 'var(--text-muted)',
             fontFamily: 'var(--font-serif)',
-            fontSize: '1rem',
+            fontSize: '0.9rem',
           }}>
             {movie.title}
           </div>
@@ -98,46 +98,56 @@ export const MovieCard = ({
         {/* Top Badges */}
         <div style={{
           position: 'absolute',
-          top: '10px',
-          left: '10px',
-          right: '10px',
+          top: '8px',
+          left: '8px',
+          right: '8px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           pointerEvents: 'none',
+          gap: '4px',
         }}>
           {/* Rating */}
-          <div style={{
-            backgroundColor: 'rgba(12, 12, 14, 0.82)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid var(--border-subtle)',
-            padding: '2px 7px',
-            borderRadius: 'var(--radius-xs)',
-            fontSize: '0.7rem',
-            fontWeight: '600',
-            color: 'var(--text-primary)',
-            fontFamily: 'var(--font-mono)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '3px',
-          }}>
-            <Star size={11} fill="var(--accent-gold)" color="var(--accent-gold)" />
+          <div 
+            className="movie-card-badge"
+            style={{
+              backgroundColor: 'rgba(12, 12, 14, 0.84)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid var(--border-subtle)',
+              padding: '2px 6px',
+              borderRadius: 'var(--radius-xs)',
+              fontSize: '0.68rem',
+              fontWeight: '600',
+              color: 'var(--text-primary)',
+              fontFamily: 'var(--font-mono)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '3px',
+              flexShrink: 0,
+            }}
+          >
+            <Star size={10} fill="var(--accent-gold)" color="var(--accent-gold)" />
             <span>{movie.vote_average ? movie.vote_average.toFixed(1) : '7.0'}</span>
           </div>
 
           {/* Match % */}
           {matchPercentage > 0 && (
-            <div style={{
-              backgroundColor: 'rgba(12, 12, 14, 0.82)',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid var(--border-subtle)',
-              padding: '2px 7px',
-              borderRadius: 'var(--radius-xs)',
-              fontSize: '0.7rem',
-              fontWeight: '600',
-              color: 'var(--accent-gold)',
-              fontFamily: 'var(--font-mono)',
-            }}>
+            <div 
+              className="movie-card-badge"
+              style={{
+                backgroundColor: 'rgba(12, 12, 14, 0.84)',
+                backdropFilter: 'blur(8px)',
+                border: '1px solid var(--border-subtle)',
+                padding: '2px 6px',
+                borderRadius: 'var(--radius-xs)',
+                fontSize: '0.68rem',
+                fontWeight: '600',
+                color: 'var(--accent-gold)',
+                fontFamily: 'var(--font-mono)',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
               {matchPercentage}% MATCH
             </div>
           )}
@@ -145,31 +155,38 @@ export const MovieCard = ({
       </div>
 
       {/* Content Body */}
-      <div style={{
-        padding: '1rem',
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        justifyContent: 'space-between',
-        gap: '0.75rem',
-      }}>
+      <div 
+        className="movie-card-body"
+        style={{
+          padding: '0.9rem 0.85rem',
+          display: 'flex',
+          flexDirection: 'column',
+          flex: 1,
+          justifyContent: 'space-between',
+          gap: '0.65rem',
+        }}
+      >
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem', marginBottom: '0.35rem' }}>
-            <h4 style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.05rem',
-              fontWeight: '600',
-              color: 'var(--text-primary)',
-              lineHeight: '1.3',
-              display: '-webkit-box',
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.35rem', marginBottom: '0.3rem' }}>
+            <h4 
+              className="movie-card-title"
+              style={{
+                fontFamily: 'var(--font-serif)',
+                fontSize: '0.96rem',
+                fontWeight: '600',
+                color: 'var(--text-primary)',
+                lineHeight: '1.3',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                wordBreak: 'break-word',
+              }}
+            >
               {movie.title}
             </h4>
             {releaseYear && (
-              <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
                 {releaseYear}
               </span>
             )}
@@ -177,12 +194,12 @@ export const MovieCard = ({
 
           {/* Genres */}
           {movie.genres && movie.genres.length > 0 && (
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '0.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginBottom: '0.4rem' }}>
               {movie.genres.slice(0, 2).map((g, i) => (
                 <span
                   key={i}
                   style={{
-                    fontSize: '0.65rem',
+                    fontSize: '0.64rem',
                     color: 'var(--text-secondary)',
                     fontFamily: 'var(--font-mono)',
                   }}
@@ -194,37 +211,41 @@ export const MovieCard = ({
           )}
 
           {/* Synopsis Excerpt */}
-          <p style={{
-            fontSize: '0.78rem',
-            color: 'var(--text-secondary)',
-            lineHeight: '1.5',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-          }}>
+          <p 
+            className="movie-card-synopsis"
+            style={{
+              fontSize: '0.74rem',
+              color: 'var(--text-secondary)',
+              lineHeight: '1.45',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
             {movie.overview || 'No synopsis available.'}
           </p>
         </div>
 
-        {/* Action Row - Separate Queue and Watched Buttons */}
+        {/* Action Row */}
         <div style={{
           display: 'flex',
-          gap: '0.4rem',
-          paddingTop: '0.65rem',
+          gap: '0.35rem',
+          paddingTop: '0.55rem',
           borderTop: '1px solid var(--border-subtle)',
         }}>
           {/* Add to Queue Button */}
           <button
             onClick={handleQueueClick}
+            className="movie-card-action-btn"
             style={{
               flex: 1,
               backgroundColor: isQueued ? 'rgba(200, 170, 118, 0.18)' : 'transparent',
               border: isQueued ? '1px solid var(--accent-gold)' : '1px solid var(--border-subtle)',
               color: isQueued ? 'var(--accent-gold)' : 'var(--text-primary)',
-              padding: '0.4rem 0.35rem',
+              padding: '0.38rem 0.25rem',
               borderRadius: 'var(--radius-xs)',
-              fontSize: '0.7rem',
+              fontSize: '0.68rem',
               fontWeight: '500',
               fontFamily: 'var(--font-mono)',
               whiteSpace: 'nowrap',
@@ -238,21 +259,22 @@ export const MovieCard = ({
             }}
             title={isQueued ? 'Remove from Queue' : 'Add to Queue'}
           >
-            <Bookmark size={11} fill={isQueued ? 'var(--accent-gold)' : 'none'} style={{ flexShrink: 0 }} />
-            <span style={{ whiteSpace: 'nowrap' }}>{isQueued ? 'In Queue' : 'Queue'}</span>
+            <Bookmark size={10} fill={isQueued ? 'var(--accent-gold)' : 'none'} style={{ flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{isQueued ? 'In Queue' : 'Queue'}</span>
           </button>
 
           {/* Mark Watched Button */}
           <button
             onClick={handleWatchedClick}
+            className="movie-card-action-btn"
             style={{
               flex: 1,
               backgroundColor: isWatched ? 'rgba(120, 180, 140, 0.18)' : 'transparent',
               border: isWatched ? '1px solid #739682' : '1px solid var(--border-subtle)',
               color: isWatched ? '#a3d4b6' : 'var(--text-primary)',
-              padding: '0.4rem 0.35rem',
+              padding: '0.38rem 0.25rem',
               borderRadius: 'var(--radius-xs)',
-              fontSize: '0.7rem',
+              fontSize: '0.68rem',
               fontWeight: '500',
               fontFamily: 'var(--font-mono)',
               whiteSpace: 'nowrap',
@@ -266,8 +288,8 @@ export const MovieCard = ({
             }}
             title={isWatched ? 'Unmark Watched' : 'Mark as Watched'}
           >
-            <Check size={11} strokeWidth={isWatched ? 3 : 2} style={{ flexShrink: 0 }} />
-            <span style={{ whiteSpace: 'nowrap' }}>{isWatched ? 'Watched' : 'Watched'}</span>
+            <Check size={10} strokeWidth={isWatched ? 3 : 2} style={{ flexShrink: 0 }} />
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{isWatched ? 'Watched' : 'Watched'}</span>
           </button>
         </div>
       </div>

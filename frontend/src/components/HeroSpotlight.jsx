@@ -7,7 +7,7 @@ export const HeroSpotlight = () => (
       zIndex: 2,
       maxWidth: '780px',
       margin: '0 auto',
-      padding: '4.5rem 1.5rem 2rem',
+      padding: 'clamp(2.25rem, 5.5vw, 4.25rem) 1.25rem clamp(1.15rem, 3vw, 2rem)',
       textAlign: 'center',
     }}
   >
@@ -15,13 +15,13 @@ export const HeroSpotlight = () => (
     <h1
       style={{
         fontFamily: 'var(--font-serif)',
-        fontSize: 'clamp(2.4rem, 5.5vw, 4rem)',
+        fontSize: 'clamp(1.85rem, 5.2vw, 3.8rem)',
         fontWeight: '400',
         fontStyle: 'italic',
         letterSpacing: '-0.5px',
         lineHeight: '1.15',
         color: '#FFFFFF',
-        marginBottom: '1.25rem',
+        marginBottom: '0.85rem',
         textShadow: '0 4px 20px rgba(0,0,0,0.8)',
       }}
     >
@@ -32,8 +32,8 @@ export const HeroSpotlight = () => (
     <p
       style={{
         color: '#d4d4cc',
-        fontSize: '1.05rem',
-        lineHeight: '1.65',
+        fontSize: 'clamp(0.86rem, 2.2vw, 1.02rem)',
+        lineHeight: '1.6',
         maxWidth: '520px',
         margin: '0 auto',
         fontWeight: '400',

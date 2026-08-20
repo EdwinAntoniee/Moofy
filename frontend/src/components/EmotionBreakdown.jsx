@@ -30,8 +30,8 @@ export const EmotionBreakdown = ({ primaryEmotion, breakdown = [] }) => {
       className="animate-fade-in"
       style={{
         maxWidth: '780px',
-        margin: '2rem auto 0.5rem',
-        padding: '0 1.5rem',
+        margin: '1.5rem auto 0.5rem',
+        padding: '0 clamp(0.75rem, 2vw, 1.5rem)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -41,8 +41,8 @@ export const EmotionBreakdown = ({ primaryEmotion, breakdown = [] }) => {
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '0.85rem',
-          padding: '0.55rem 1.35rem',
+          gap: 'clamp(0.45rem, 1.8vw, 0.75rem)',
+          padding: '0.45rem clamp(0.85rem, 2.5vw, 1.25rem)',
           borderRadius: 'var(--radius-full)',
           border: '1px solid rgba(255, 255, 255, 0.14)',
           backgroundColor: 'rgba(18, 18, 22, 0.95)',
@@ -55,17 +55,17 @@ export const EmotionBreakdown = ({ primaryEmotion, breakdown = [] }) => {
         <span
           style={{
             color: '#a0a098',
-            fontSize: '0.78rem',
+            fontSize: 'clamp(0.68rem, 1.8vw, 0.76rem)',
             fontFamily: 'var(--font-mono)',
-            letterSpacing: '0.6px',
+            letterSpacing: '0.5px',
             textTransform: 'uppercase',
             fontWeight: '600',
           }}
         >
-          Mood Detected:
+          Mood:
         </span>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
           {displayItems.map((item, i) => {
             const meta = EMOTION_META[item.emotion] || {
               color: 'var(--accent-gold)',
@@ -79,29 +79,31 @@ export const EmotionBreakdown = ({ primaryEmotion, breakdown = [] }) => {
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
-                  padding: isPrimary ? '0.28rem 0.75rem' : '0.22rem 0.6rem',
+                  gap: '0.35rem',
+                  padding: isPrimary ? '0.24rem 0.65rem' : '0.2rem 0.55rem',
                   borderRadius: 'var(--radius-full)',
                   backgroundColor: isPrimary
                     ? 'rgba(255, 255, 255, 0.08)'
                     : 'rgba(255, 255, 255, 0.03)',
                   border: `1px solid ${isPrimary ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.08)'}`,
-                  fontSize: '0.84rem',
+                  fontSize: 'clamp(0.72rem, 2vw, 0.8rem)',
                 }}
               >
                 <span
                   style={{
-                    width: isPrimary ? '8px' : '6px',
-                    height: isPrimary ? '8px' : '6px',
+                    width: isPrimary ? '7px' : '5px',
+                    height: isPrimary ? '7px' : '5px',
                     borderRadius: '50%',
                     backgroundColor: meta.color,
                     boxShadow: `0 0 8px ${meta.color}`,
+                    flexShrink: 0,
                   }}
                 />
                 <span
                   style={{
                     color: isPrimary ? '#ffffff' : '#d0d0c8',
                     fontWeight: isPrimary ? '600' : '500',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {meta.label}
@@ -109,7 +111,7 @@ export const EmotionBreakdown = ({ primaryEmotion, breakdown = [] }) => {
                 {item.percentage !== null && item.percentage !== undefined && (
                   <span
                     style={{
-                      fontSize: '0.75rem',
+                      fontSize: 'clamp(0.66rem, 1.8vw, 0.72rem)',
                       color: isPrimary ? 'var(--accent-gold)' : '#a0a098',
                       fontFamily: 'var(--font-mono)',
                       fontWeight: '600',

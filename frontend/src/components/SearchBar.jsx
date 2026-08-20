@@ -13,11 +13,11 @@ export const SearchBar = ({ onSearch, loading, initialPrompt = '', initialAlpha 
   };
 
   const getSliderLabel = (val) => {
-    if (val <= 0.2) return 'Mood only (90% Mood)';
-    if (val < 0.45) return 'Mood-leaning (70% Mood)';
-    if (val <= 0.55) return 'Balanced (50% Mood / 50% Plot)';
-    if (val < 0.8) return 'Plot-leaning (70% Plot)';
-    return 'Plot only (90% Plot)';
+    if (val <= 0.2) return '90% Mood / 10% Plot';
+    if (val < 0.45) return '70% Mood / 30% Plot';
+    if (val <= 0.55) return '50% Mood / 50% Plot';
+    if (val < 0.8) return '30% Mood / 70% Plot';
+    return '10% Mood / 90% Plot';
   };
 
   return (
@@ -28,14 +28,14 @@ export const SearchBar = ({ onSearch, loading, initialPrompt = '', initialAlpha 
         maxWidth: '760px',
         width: '100%',
         margin: '0 auto',
-        padding: '0 1rem',
+        padding: '0 clamp(0.75rem, 2.5vw, 1rem)',
       }}
     >
       <form onSubmit={handleSubmit}>
         <div
           className="editorial-card"
           style={{
-            padding: 'clamp(1.1rem, 3vw, 1.85rem)',
+            padding: 'clamp(0.9rem, 2.8vw, 1.75rem)',
             backgroundColor: 'rgba(16, 16, 20, 0.94)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
@@ -44,7 +44,7 @@ export const SearchBar = ({ onSearch, loading, initialPrompt = '', initialAlpha 
           }}
         >
           {/* Main textarea */}
-          <div style={{ marginBottom: '1.15rem' }}>
+          <div style={{ marginBottom: '1rem' }}>
             <textarea
               rows={3}
               value={prompt}
@@ -56,9 +56,9 @@ export const SearchBar = ({ onSearch, loading, initialPrompt = '', initialAlpha 
                 border: '1px solid rgba(255, 255, 255, 0.16)',
                 borderRadius: 'var(--radius-sm)',
                 color: '#ffffff',
-                padding: 'clamp(0.85rem, 2vw, 1.05rem) clamp(0.9rem, 2vw, 1.2rem)',
-                fontSize: 'clamp(0.9rem, 2vw, 1rem)',
-                lineHeight: '1.6',
+                padding: 'clamp(0.75rem, 2vw, 1rem) clamp(0.85rem, 2vw, 1.15rem)',
+                fontSize: 'clamp(0.85rem, 2.2vw, 0.98rem)',
+                lineHeight: '1.55',
                 resize: 'vertical',
                 outline: 'none',
                 fontFamily: 'inherit',
@@ -72,11 +72,11 @@ export const SearchBar = ({ onSearch, loading, initialPrompt = '', initialAlpha 
           {/* Hybrid weighting slider */}
           <div
             style={{
-              padding: '0.85rem 1rem',
+              padding: '0.75rem 0.9rem',
               backgroundColor: 'rgba(255, 255, 255, 0.03)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               borderRadius: 'var(--radius-sm)',
-              marginBottom: '1.25rem',
+              marginBottom: '1.15rem',
               position: 'relative',
             }}
           >
@@ -85,54 +85,54 @@ export const SearchBar = ({ onSearch, loading, initialPrompt = '', initialAlpha 
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                marginBottom: '0.65rem',
-                gap: '0.5rem',
+                marginBottom: '0.55rem',
+                gap: '0.4rem',
+                flexWrap: 'wrap',
               }}
             >
               <div
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.45rem',
-                  fontSize: '0.82rem',
+                  gap: '0.4rem',
+                  fontSize: 'clamp(0.74rem, 2vw, 0.82rem)',
                   color: '#e0e0d8',
                   fontWeight: '600',
                 }}
               >
-                <Sliders size={13} color="var(--accent-gold)" />
-                <span style={{ whiteSpace: 'nowrap' }}>Recommendation Focus</span>
+                <Sliders size={12} color="var(--accent-gold)" style={{ flexShrink: 0 }} />
+                <span>Recommendation Focus</span>
               </div>
 
               {/* Slider information visible when user drags or interacts with the slider */}
               <span
                 style={{
-                  fontSize: '0.75rem',
+                  fontSize: 'clamp(0.68rem, 1.8vw, 0.74rem)',
                   color: 'var(--accent-gold)',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                  letterSpacing: '0.3px',
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.2px',
                   fontWeight: '600',
                   opacity: isInteractingSlider ? 1 : 0,
-                  transform: isInteractingSlider ? 'translateY(0)' : 'translateY(3px)',
+                  transform: isInteractingSlider ? 'translateY(0)' : 'translateY(2px)',
                   transition: 'all 0.2s cubic-bezier(0.2, 0, 0, 1)',
                   pointerEvents: 'none',
                   whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
                 }}
               >
                 {getSliderLabel(alpha)}
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
               <span
                 style={{
-                  fontSize: '0.7rem',
+                  fontSize: '0.66rem',
                   color: '#a0a098',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                  letterSpacing: '0.5px',
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.4px',
                   fontWeight: '600',
                   userSelect: 'none',
+                  flexShrink: 0,
                 }}
               >
                 MOOD
@@ -160,12 +160,13 @@ export const SearchBar = ({ onSearch, loading, initialPrompt = '', initialAlpha 
               />
               <span
                 style={{
-                  fontSize: '0.7rem',
+                  fontSize: '0.66rem',
                   color: '#a0a098',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-                  letterSpacing: '0.5px',
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.4px',
                   fontWeight: '600',
                   userSelect: 'none',
+                  flexShrink: 0,
                 }}
               >
                 PLOT
@@ -186,21 +187,21 @@ export const SearchBar = ({ onSearch, loading, initialPrompt = '', initialAlpha 
               disabled={loading || !prompt.trim()}
               className="btn-editorial-primary"
               style={{
-                padding: '0.6rem 1.25rem',
-                fontSize: '0.85rem',
+                padding: '0.55rem 1.15rem',
+                fontSize: 'clamp(0.78rem, 2vw, 0.85rem)',
                 opacity: loading || !prompt.trim() ? 0.48 : 1,
                 cursor: loading || !prompt.trim() ? 'not-allowed' : 'pointer',
               }}
             >
               {loading ? (
                 <>
-                  <Sparkles size={14} className="animate-spin" />
+                  <Sparkles size={13} className="animate-spin" />
                   <span>Reading your mood...</span>
                 </>
               ) : (
                 <>
                   <span>Find My Film</span>
-                  <ArrowRight size={14} />
+                  <ArrowRight size={13} />
                 </>
               )}
             </button>
